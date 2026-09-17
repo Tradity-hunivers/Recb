@@ -50,6 +50,20 @@ Sur Cloudflare Pages, `plombier-montauban.html` est servi à l'URL
 
 Le HTTPS et le HTTP/2 sont fournis par Cloudflare, il n'y a rien à configurer.
 
+### Aperçu sur GitHub Pages
+
+`.github/workflows/apercu-github-pages.yml` publie une copie du site sur
+GitHub Pages à chaque push sur la branche par défaut, pour la consulter depuis
+un téléphone avant la mise en production. **Ce n'est pas le déploiement du
+site** : la copie est adaptée par `tools/preview-github-pages.py` aux
+contraintes de GitHub Pages (sous-dossier, pages transformées en dossiers,
+aucune exécution côté serveur), le formulaire y est neutralisé et l'ensemble
+est en `noindex` pour ne pas concurrencer le vrai site.
+
+GitHub Pages sur un dépôt privé demande un plan payant. Sur un compte gratuit,
+il faut rendre le dépôt public — ou se passer de cet aperçu, l'URL de
+prévisualisation de Cloudflare Pages remplissant le même rôle.
+
 ### Activer le formulaire de devis
 
 Le formulaire est un `<form method="POST">` classique qui poste vers

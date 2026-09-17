@@ -1,0 +1,58 @@
+# Publie un APERÇU du site sur GitHub Pages, pour pouvoir le consulter en
+# ligne depuis un téléphone avant la mise en production.
+#
+# Ce n'est pas la chaîne de déploiement du site. La production va sur
+# Cloudflare Pages, directement depuis les fichiers du dépôt, sans
+# transformation : formulaire fonctionnel, URL propres, redirections et
+# en-têtes de sécurité. Ici, tools/preview-github-pages.py adapte une copie
+# aux contraintes de GitHub Pages (sous-dossier, pas d'URL sans extension,
+# aucune exécution côté serveur) et interdit son indexation.
+
+name: Aperçu GitHub Pages
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois, sans annuler celui qui est en cours.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  apercu:
+    # GitHub Pages ne se déploie que depuis la branche par défaut du dépôt.
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Activer et configurer Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Construire l'aperçu
+        run: |
+          python3 tools/preview-github-pages.py . _apercu "${{ steps.pages.outputs.base_path }}"
+          echo "Contenu publié :"
+          find _apercu -maxdepth 2 -name index.html | sort
+
+      - name: Déposer l'artefact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _apercu
+
+      - name: Déployer
+        id: deploiement
+        uses: actions/deploy-pages@v4
