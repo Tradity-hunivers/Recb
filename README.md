@@ -60,9 +60,12 @@ contraintes de GitHub Pages (sous-dossier, pages transformées en dossiers,
 aucune exécution côté serveur), le formulaire y est neutralisé et l'ensemble
 est en `noindex` pour ne pas concurrencer le vrai site.
 
-GitHub Pages sur un dépôt privé demande un plan payant. Sur un compte gratuit,
-il faut rendre le dépôt public — ou se passer de cet aperçu, l'URL de
-prévisualisation de Cloudflare Pages remplissant le même rôle.
+L'aperçu est publié sur <https://tradity-hunivers.github.io/Recb/>.
+
+Le dépôt est public : c'est ce qui rend GitHub Pages disponible sans plan
+payant. S'il repassait en privé, l'aperçu cesserait de se publier — GitHub
+Pages sur dépôt privé demande GitHub Pro. L'URL de prévisualisation de
+Cloudflare Pages remplit alors le même rôle, sans cette contrainte.
 
 ### Activer le formulaire de devis
 

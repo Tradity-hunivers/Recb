@@ -34,7 +34,7 @@ jobs:
       url: ${{ steps.deploiement.outputs.page_url }}
     steps:
       - name: Récupérer le dépôt
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Activer et configurer Pages
         id: pages
