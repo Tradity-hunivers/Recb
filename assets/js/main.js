@@ -26,26 +26,90 @@
   }
 
   /* -------------------------------------------------- 1. découpage des titres
-     Chaque mot est enveloppé pour pouvoir monter depuis le bas. Le texte reste
-     dans le DOM : aucun impact sur le référencement ni sur les lecteurs d'écran. */
+     Chaque mot — ou chaque caractère — est enveloppé pour pouvoir monter depuis
+     le bas. Le texte reste dans le DOM : aucun impact sur le référencement ni
+     sur les lecteurs d'écran.
+
+     Trois modes, via l'attribut data-split :
+       (vide) mot à mot, la révélation par défaut
+       char   caractère par caractère, réservé aux titres courts
+       lit    mot à mot, mais l'opacité est pilotée par le défilement */
   function splitWords(el) {
-    if (el.dataset.split === 'done') return;
+    var mode = el.dataset.split;
+    if (mode === 'done') return;
     var words = el.textContent.trim().split(/\s+/);
     var frag = document.createDocumentFragment();
+    var ci = 0;
+
     words.forEach(function (word, i) {
       var span = document.createElement('span');
       span.className = 'w';
       span.style.setProperty('--wi', i);
-      var inner = document.createElement('i');
-      inner.textContent = word;
-      span.appendChild(inner);
+
+      if (mode === 'char') {
+        // Le mot reste insécable : la césure de ligne ne tombe pas au milieu.
+        word.split('').forEach(function (ch) {
+          var box = document.createElement('span');
+          box.className = 'c';
+          box.style.setProperty('--ci', ci++);
+          var inner = document.createElement('i');
+          inner.textContent = ch;
+          box.appendChild(inner);
+          span.appendChild(box);
+        });
+      } else {
+        var inner = document.createElement('i');
+        inner.textContent = word;
+        span.appendChild(inner);
+      }
+
       frag.appendChild(span);
       if (i < words.length - 1) frag.appendChild(document.createTextNode(' '));
     });
+
     el.textContent = '';
     el.appendChild(frag);
     el.classList.add('split');
+    if (mode === 'char') el.classList.add('split--char');
     el.dataset.split = 'done';
+  }
+
+  /* ------------------------------- 1 bis. lettres qui se relaient au survol
+     Chaque lettre est doublée : la première sort par le haut, la seconde entre
+     par le bas. Jamais sur un numéro de téléphone — on ne brouille pas une
+     information que le visiteur doit lire. */
+  function setupSwap() {
+    if (!fine.matches || !motionOK()) return;
+    $$('[data-swap]').forEach(function (el) {
+      if (el.dataset.swap === 'done') return;
+      var texte = el.textContent.trim();
+      var frag = document.createDocumentFragment();
+      var boite = document.createElement('span');
+      boite.className = 'swap';
+
+      texte.split('').forEach(function (ch, i) {
+        if (ch === ' ') {
+          boite.appendChild(document.createTextNode(' '));
+          return;
+        }
+        var lettre = document.createElement('span');
+        lettre.className = 'swap__l';
+        lettre.style.setProperty('--li', i);
+        var haut = document.createElement('span');
+        haut.textContent = ch;
+        var bas = document.createElement('span');
+        bas.textContent = ch;
+        bas.setAttribute('aria-hidden', 'true');
+        lettre.appendChild(haut);
+        lettre.appendChild(bas);
+        boite.appendChild(lettre);
+      });
+
+      frag.appendChild(boite);
+      el.textContent = '';
+      el.appendChild(frag);
+      el.dataset.swap = 'done';
+    });
   }
 
   /* ------------------------------------------------ 2. révélations au défilement */
@@ -54,7 +118,9 @@
 
     if (!('IntersectionObserver' in window) || !motionOK()) {
       items.forEach(function (el) { el.classList.add('is-in'); });
-      $$('[data-count]').forEach(function (el) { el.textContent = el.dataset.count; });
+      $$('[data-count]').forEach(function (el) {
+        el.textContent = (el.dataset.prefix || '') + el.dataset.count + (el.dataset.suffix || '');
+      });
       return;
     }
 
@@ -357,9 +423,70 @@
     });
   }
 
+  /* ------------------------------- 14. effets pilotés par la position lue
+     Deux effets partagent un seul écouteur de défilement, et ne calculent que
+     pour les éléments réellement à l'écran :
+
+     · la maquette du hero part inclinée en arrière et se redresse à mesure que
+       la page descend (« Container Scroll »)
+     · les mots d'une phrase passent du gris clair à l'encre au fil du
+       défilement (« Text Reveal »)
+
+     Les deux angles de la maquette — défilement et survol — sont portés par
+     deux variables distinctes que le CSS additionne, pour qu'ils cohabitent. */
+  function setupScrollFX() {
+    if (!motionOK() || !('IntersectionObserver' in window)) return;
+    var mock = $('.hero .mock');
+    var lits = $$('.lit');
+    if (!mock && !lits.length) return;
+
+    var actifs = [];
+
+    var maj = rafThrottle(function () {
+      var h = window.innerHeight;
+      actifs.forEach(function (el) {
+        var r = el.getBoundingClientRect();
+
+        if (el === mock) {
+          var p = Math.min(Math.max(1 - r.top / (h * 0.75), 0), 1);
+          el.style.setProperty('--srx', (11 * (1 - p)).toFixed(2) + 'deg');
+          el.style.setProperty('--ssc', (0.96 + 0.04 * p).toFixed(3));
+          return;
+        }
+
+        var mots = el.__mots || (el.__mots = $$('.w', el));
+        if (!mots.length) return;
+        var n = mots.length;
+        var q = Math.min(Math.max((h * 0.82 - r.top) / (r.height + h * 0.3), 0), 1);
+        mots.forEach(function (w, i) {
+          var o = Math.min(Math.max((q * (n + 6) - i) / 4, 0.22), 1);
+          w.style.opacity = o.toFixed(2);
+        });
+      });
+    });
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var i = actifs.indexOf(e.target);
+        if (e.isIntersecting && i < 0) actifs.push(e.target);
+        else if (!e.isIntersecting && i >= 0) actifs.splice(i, 1);
+      });
+      maj();
+    }, { rootMargin: '15% 0px 15% 0px' });
+
+    if (mock) io.observe(mock);
+    lits.forEach(function (el) { io.observe(el); });
+
+    window.addEventListener('scroll', maj, { passive: true });
+    window.addEventListener('resize', maj, { passive: true });
+    maj();
+  }
+
   /* ------------------------------------------------------------- démarrage */
   function init() {
     setupReveals();
+    setupSwap();
+    setupScrollFX();
     setupHeader();
     setupDrawer();
     setupTilt();

@@ -865,7 +865,12 @@ body.is-locked { overflow: hidden; }
     scroll-behavior: auto !important;
   }
   [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; }
-  .split .w > i { transform: none !important; }
+  .split .w > i, .split--char .c > i, .swap__l span { transform: none !important; }
+  /* Sans animation, la phrase qui s'allume au défilement doit être lisible
+     d'emblée, et la maquette rester droite. */
+  .lit .w { opacity: 1 !important; }
+  .mock { --srx: 0deg !important; --ssc: 1 !important; }
+  .paths path { stroke-dashoffset: 0 !important; }
   .marquee__track { animation: none; }
   .blob { animation: none; }
   .callbar { transform: none; }
@@ -877,3 +882,104 @@ body.is-locked { overflow: hidden; }
   [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
   a[href^="http"]::after { content: ' (' attr(href) ')'; font-size: 11px; }
 }
+
+/* ==========================================================================
+   15. EFFETS SÉLECTIONNÉS SUR 21ST.DEV
+   Les composants d'origine sont en React + Tailwind + Framer Motion. Ils sont
+   ici réinterprétés en CSS natif : même effet visuel, aucune dépendance,
+   aucune étape de build. Tout est désactivé sous prefers-reduced-motion, et
+   les effets de survol sont réservés aux pointeurs fins.
+   ========================================================================== */
+
+/* --- « Vertical Cut Reveal » : révélation caractère par caractère ---------
+   Les mots restent insécables pour que la césure de ligne reste correcte. */
+.split--char .w { white-space: nowrap; }
+.split--char .c { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .08em; }
+.split--char .c > i {
+  display: inline-block; font-style: inherit;
+  transform: translateY(105%);
+  transition: transform .75s var(--ease-out);
+  transition-delay: calc(var(--ci, 0) * 16ms + var(--d, 0ms));
+}
+.split--char.is-in .c > i { transform: none; }
+
+/* --- « Text Reveal » : les mots s'allument au fil du défilement ----------- */
+.lit {
+  font-size: clamp(23px, 1.1rem + 2.4vw, 42px);
+  font-weight: var(--fw-extra);
+  line-height: 1.32;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  max-width: 28ch;
+  text-wrap: pretty;
+}
+/* Les mots éteints restent lisibles comme un gris de fond : en dessous, le bloc
+   paraît vide plutôt qu'en attente. */
+.js .lit .w { opacity: .22; transition: opacity .18s linear; }
+.lit .w { opacity: 1; }
+
+/* --- « Container Scroll » : la maquette se redresse au défilement --------
+   Composé avec l'inclinaison au survol : les deux angles s'additionnent. */
+.mock {
+  transform:
+    perspective(1400px)
+    rotateX(calc(var(--srx, 0deg) + var(--rx, 0deg)))
+    rotateY(var(--ry, 0deg))
+    scale(var(--ssc, 1));
+}
+.js .mock { --srx: 11deg; --ssc: .96; }
+
+/* --- « Shiny Button » : halo tournant derrière l'action principale -------
+   Le dégradé est porté par un enrobage : le bouton garde son overflow, qui
+   sert déjà au balayage lumineux. */
+.glow { position: relative; display: inline-flex; isolation: isolate; border-radius: var(--r-btn); }
+.glow::before {
+  content: ''; position: absolute; left: 50%; top: 50%; z-index: -1;
+  width: 150%; aspect-ratio: 1; translate: -50% -50%;
+  background: conic-gradient(transparent 0 68%, #9ccbff 80%, #ffffff 87%, #9ccbff 94%, transparent 100%);
+  filter: blur(7px);
+  opacity: 0;
+  animation: tourne 3.6s linear infinite;
+  transition: opacity .4s var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .glow:hover::before { opacity: .85; }
+}
+@keyframes tourne { to { rotate: 360deg; } }
+
+/* --- « Random Letter Swap » : les lettres se relaient au survol ----------
+   Sur les liens texte uniquement, jamais sur un numéro de téléphone : on ne
+   brouille pas une information qu'on demande au visiteur de lire. */
+.swap { display: inline-flex; overflow: hidden; vertical-align: top; }
+.swap__l { display: inline-block; position: relative; }
+.swap__l span {
+  display: inline-block;
+  transition: transform .34s var(--ease-out);
+  transition-delay: calc(var(--li, 0) * 22ms);
+}
+.swap__l span:last-child { position: absolute; left: 0; top: 0; transform: translateY(105%); }
+@media (hover: hover) and (pointer: fine) {
+  .link:hover .swap__l span:first-child,
+  .btn:hover .swap__l span:first-child { transform: translateY(-105%); }
+  .link:hover .swap__l span:last-child,
+  .btn:hover .swap__l span:last-child { transform: none; }
+}
+
+/* --- « Background Paths » : tracés qui se dessinent dans le bandeau ------- */
+.paths { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .5; }
+.paths path {
+  fill: none; stroke: var(--cyan); stroke-width: 1.4; stroke-linecap: round;
+  stroke-dasharray: var(--len, 900);
+  stroke-dashoffset: var(--len, 900);
+}
+.is-in .paths path {
+  animation: trace 3.6s var(--ease-out) forwards;
+  animation-delay: calc(var(--pi, 0) * 260ms);
+}
+@keyframes trace {
+  to { stroke-dashoffset: 0; }
+}
+
+/* --- Marquee : seconde ligne en sens inverse ----------------------------- */
+.marquee--retour .marquee__track { animation-duration: 52s; animation-direction: reverse; }
+.marquee--retour .marquee__item { font-size: clamp(14px, 2vw, 18px); color: #bdcfe2; }
