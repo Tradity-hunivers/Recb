@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /merci
+Disallow: /api/
+
+Sitemap: https://www.recb82.com/sitemap.xml

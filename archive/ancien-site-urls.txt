@@ -1,0 +1,56 @@
+Archive de l'ancien site RECB82 (Wix) — relevé du 17 septembre 2026, avant refonte.
+Source : https://www.recb82.com/sitemap.xml -> https://www.recb82.com/pages-sitemap.xml
+Généré par Wix, lastmod déclaré : 2026-02-06
+
+URL indexables (2)
+------------------
+https://www.recb82.com
+https://www.recb82.com/renovation-salle-de-bain-montauban
+
+Les deux URL sont conservées à l'identique dans le nouveau site.
+Aucune redirection 301 n'est donc nécessaire pour elles : voir _redirects.
+
+Menu de l'ancien site (ancres de la page d'accueil, pas des pages)
+------------------------------------------------------------------
+Accueil · À propos de nous · Nos services · Nos produits · Contact
+
+robots.txt de l'ancien site
+---------------------------
+User-agent: *
+Allow: /
+Disallow: *?lightbox=
+
+User-agent: AdsBot-Google-Mobile
+User-agent: AdsBot-Google
+Disallow: /_partials*
+Disallow: /pro-gallery-webapp/v1/galleries/*
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: dotbot
+Crawl-delay: 10
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+Sitemap: https://www.recb82.com/sitemap.xml
+
+Balises relevées
+----------------
+/ :
+  title       Rénovation | Recb82 | Occitanie
+  description RECB82 est une entreprise située a Montauban dans le Tarn et Garonne (82),
+              nous somme spécialisé dans les travaux de rénovation et de maintenance immobilière.
+  JSON-LD     {"@type":"WebSite","name":"RECB82","url":"https://www.recb82.com"}
+              (aucun LocalBusiness, aucune donnée NAP structurée)
+
+/renovation-salle-de-bain-montauban :
+  title       Rénovation salle de bain montauban | RECB82
+  description absente
+
+Actifs visuels de l'ancien site
+-------------------------------
+Deux visuels « AVANT / APRÈS » étaient présents sur la page salle de bain.
+Ils n'ont pas été repris : le client a demandé que seules les informations
+textuelles soient récupérées. À récupérer auprès de RECB82 avant la coupure
+de l'abonnement Wix si ces photos doivent alimenter la galerie.

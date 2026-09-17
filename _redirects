@@ -1,0 +1,30 @@
+# Redirections de migration — ancien site Wix vers Cloudflare Pages.
+#
+# L'ancien sitemap ne contenait que deux URL indexables (voir
+# archive/ancien-site-urls.txt). Les deux sont CONSERVÉES à l'identique :
+#   /                                     -> page d'accueil, inchangée
+#   /renovation-salle-de-bain-montauban   -> même URL, page refondue
+# Aucune redirection n'est donc nécessaire pour elles : leur antériorité et
+# leurs positions sont préservées telles quelles.
+#
+# Les règles ci-dessous ne traitent que des variantes d'URL générées par Wix
+# ou saisies à la main. Chacune pointe vers la page la plus proche
+# thématiquement, jamais vers l'accueil par défaut.
+
+# Variantes de la page d'accueil
+/index.html                         /                                       301
+/home                               /                                       301
+/accueil                            /                                       301
+
+# Sections qui étaient des ancres de la page d'accueil Wix
+/a-propos-de-nous                   /#services                              301
+/nos-services                       /#services                              301
+/nos-produits                       /#forfait                               301
+/contact                            /devis                                  301
+
+# Variantes de la page salle de bain, seule page interne de l'ancien site
+/renovation-salle-de-bain           /renovation-salle-de-bain-montauban     301
+/salle-de-bain-montauban            /renovation-salle-de-bain-montauban     301
+
+# Ancien plan de site Wix
+/pages-sitemap.xml                  /sitemap.xml                            301
