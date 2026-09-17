@@ -370,6 +370,7 @@ body.is-locked { overflow: hidden; }
    -------------------------------------------------------------------------- */
 .hero {
   position: relative;
+  isolation: isolate;
   padding-top: calc(var(--header-h) + clamp(24px, 6vw, 72px));
   padding-bottom: clamp(48px, 8vw, 96px);
   overflow: hidden;
@@ -393,7 +394,7 @@ body.is-locked { overflow: hidden; }
    se placent derrière la maquette et les bords, où elles peuvent respirer. */
 .blob {
   position: absolute; border-radius: 50%;
-  filter: blur(60px); opacity: .14; pointer-events: none; z-index: 0;
+  filter: blur(60px); opacity: .14; pointer-events: none; z-index: -1;
   will-change: transform;
   transform: translate3d(0, var(--py, 0px), 0);
 }
@@ -871,6 +872,13 @@ body.is-locked { overflow: hidden; }
   .lit .w { opacity: 1 !important; }
   .mock { --srx: 0deg !important; --ssc: 1 !important; }
   .paths path { stroke-dashoffset: 0 !important; }
+  /* Tracés du hero dessinés d'emblée, colonnes d'avis figées, faisceaux
+     immobiles, schémas complets : rien ne bouge, tout reste lisible. */
+  .hero__paths path { animation: none !important; stroke-dashoffset: 0 !important; opacity: .7; }
+  .avis__track { animation: none !important; }
+  .btn::after, .avis__card::after, .work::after { animation: none !important; }
+  .btn--live { animation: none !important; }
+  .work__media .draw > * { stroke-dashoffset: 0 !important; }
   .marquee__track { animation: none; }
   .blob { animation: none; }
   .callbar { transform: none; }
@@ -929,24 +937,6 @@ body.is-locked { overflow: hidden; }
 }
 .js .mock { --srx: 11deg; --ssc: .96; }
 
-/* --- « Shiny Button » : halo tournant derrière l'action principale -------
-   Le dégradé est porté par un enrobage : le bouton garde son overflow, qui
-   sert déjà au balayage lumineux. */
-.glow { position: relative; display: inline-flex; isolation: isolate; border-radius: var(--r-btn); }
-.glow::before {
-  content: ''; position: absolute; left: 50%; top: 50%; z-index: -1;
-  width: 150%; aspect-ratio: 1; translate: -50% -50%;
-  background: conic-gradient(transparent 0 68%, #9ccbff 80%, #ffffff 87%, #9ccbff 94%, transparent 100%);
-  filter: blur(7px);
-  opacity: 0;
-  animation: tourne 3.6s linear infinite;
-  transition: opacity .4s var(--ease);
-}
-@media (hover: hover) and (pointer: fine) {
-  .glow:hover::before { opacity: .85; }
-}
-@keyframes tourne { to { rotate: 360deg; } }
-
 /* --- « Random Letter Swap » : les lettres se relaient au survol ----------
    Sur les liens texte uniquement, jamais sur un numéro de téléphone : on ne
    brouille pas une information qu'on demande au visiteur de lire. */
@@ -983,3 +973,224 @@ body.is-locked { overflow: hidden; }
 /* --- Marquee : seconde ligne en sens inverse ----------------------------- */
 .marquee--retour .marquee__track { animation-duration: 52s; animation-direction: reverse; }
 .marquee--retour .marquee__item { font-size: clamp(14px, 2vw, 18px); color: #bdcfe2; }
+
+
+/* ==========================================================================
+   16. LA LUMIÈRE QUI PARCOURT UN TRACÉ
+   Quatre composants de 21st.dev réunis par un même langage : des lignes qui
+   se dessinent et une lumière qui les parcourt. Hero (Background Paths +
+   Cursor Spotlight), boutons (Border Beam), avis (Testimonials Columns),
+   réalisations (Focus Cards). Toujours en CSS et JS natifs, sans build.
+   ========================================================================== */
+
+/* --- Hero : « Background Paths » ------------------------------------------
+   72 tracés générés par la formule de Kokonut UI. Chacun se dessine à
+   l'arrivée, puis une lumière dérive le long de la ligne en continu. Les
+   variables --t (durée) et --dl (départ) sont posées par tracé dans le HTML. */
+.hero__paths {
+  position: absolute; inset: 0; z-index: -1;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  color: var(--ink);
+}
+.hero__paths path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;   /* épaisseur en pixels, quelle que soit l'échelle */
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+}
+/* La couche de base s'éclaircit derrière le texte, à gauche, et garde toute sa
+   présence derrière la maquette, à droite : les lignes décorent, le texte se lit. */
+.hero__paths:not(.hero__paths--lit) {
+  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.28), rgba(0,0,0,.5) 42%, #000 64%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,.28), rgba(0,0,0,.5) 42%, #000 64%);
+}
+/* Coût de peinture maîtrisé : animer stroke-dashoffset repeint tout le hero à
+   chaque image. La couche de base se dessine donc UNE fois, puis ne bouge plus
+   que par une transformation — composée par le GPU, sans repeindre. Seule la
+   couche allumée sous le curseur, réduite à 12 tracés, garde la lumière qui
+   voyage en continu. */
+.js .hero__paths path {
+  animation: dessine 2.6s var(--ease-out) var(--dl, 0s) both;
+}
+.js .hero__paths:not(.hero__paths--lit) {
+  transform-origin: 50% 50%;
+  will-change: transform;
+  animation: derive-douce 36s ease-in-out infinite alternate;
+}
+.js .hero__paths--lit path {
+  animation:
+    dessine 2.6s var(--ease-out) var(--dl, 0s) both,
+    derive var(--t, 14s) linear calc(var(--dl, 0s) + 2.6s) infinite;
+}
+@keyframes dessine { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes derive  { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -2; } }
+@keyframes derive-douce {
+  from { transform: translate3d(-10px, 6px, 0) scale(1); }
+  to   { transform: translate3d(12px, -8px, 0) scale(1.05); }
+}
+
+/* Hors écran, on arrête de peindre : 72 tracés animés ont un coût. */
+.hero.is-off .hero__paths, .hero.is-off .hero__paths path { animation-play-state: paused; }
+
+/* Couche allumée : un tracé sur trois, en bleu, révélé par un masque
+   circulaire qui suit le curseur (« Cursor Spotlight »). */
+.hero__paths--lit {
+  color: var(--blue);
+  -webkit-mask-image: radial-gradient(440px circle at var(--mx, 68%) var(--my, 55%), #000 0%, rgba(0,0,0,.6) 35%, transparent 72%);
+  mask-image: radial-gradient(440px circle at var(--mx, 68%) var(--my, 55%), #000 0%, rgba(0,0,0,.6) 35%, transparent 72%);
+}
+/* Lueur douce qui accompagne le projecteur — le halo que le curseur promène. */
+.hero__spot {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx, 68%) var(--my, 55%), rgba(0,107,255,.13), transparent 62%);
+}
+@media (hover: none), (max-width: 859px) {
+  .hero__paths--lit, .hero__spot { display: none; }
+  /* Un tracé sur deux suffit sur un petit écran, et coûte moitié moins ;
+     un peu plus épais pour rester visible à l'échelle d'un téléphone. */
+  .hero__paths path:nth-child(2n) { display: none; }
+  .hero__paths path { stroke-width: 1px; }
+  /* Sur un écran étroit le texte occupe toute la largeur : le fondu devient
+     vertical, plus léger au milieu, là où le paragraphe se lit. */
+  .hero__paths:not(.hero__paths--lit) {
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.22) 45%, rgba(0,0,0,.4) 100%);
+    mask-image: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.22) 45%, rgba(0,0,0,.4) 100%);
+  }
+}
+
+/* --- Boutons : « Border Beam » --------------------------------------------
+   Un faisceau parcourt la bordure. Il tourne en continu sur le bouton d'appel
+   du hero, et s'allume au survol partout ailleurs. Le dégradé conique est
+   découpé en anneau par un masque : seule la bordure s'éclaire. */
+@property --ang {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+.btn::after {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--ang), transparent 0 72%, var(--beam, var(--blue)) 88%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s var(--ease);
+  animation: faisceau 2.4s linear infinite;
+  pointer-events: none;
+}
+.btn:hover::after, .btn:focus-visible::after, .btn--live::after { opacity: 1; }
+@keyframes faisceau { to { --ang: 360deg; } }
+.btn--primary { --beam: #ffffff; }
+.btn--dark    { --beam: var(--cyan); }
+.btn--outline { --beam: #ffffff; }
+.btn--ghost   { --beam: var(--blue); }
+/* Le bouton d'appel du hero porte aussi une pulsation de son ombre bleue. */
+.btn--live { animation: pulse-ombre 3.2s var(--ease) infinite; }
+@keyframes pulse-ombre {
+  0%, 100% { box-shadow: 0 6px 18px rgba(0,107,255,.28); }
+  50%      { box-shadow: 0 10px 34px rgba(0,107,255,.46); }
+}
+
+/* --- Avis : « Testimonials Columns » --------------------------------------
+   Trois colonnes qui montent à l'infini, chacune à sa vitesse, fondues en
+   haut et en bas. Le contenu de chaque colonne est dupliqué : le retour au
+   point de départ est invisible. */
+.avis {
+  display: grid; gap: 20px;
+  height: clamp(480px, 70vh, 620px);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
+}
+.avis__col { overflow: hidden; }
+.avis__track {
+  display: flex; flex-direction: column; gap: 20px;
+  animation: monte var(--t, 42s) linear infinite;
+  animation-delay: var(--dl, 0s);
+}
+.avis:hover .avis__track { animation-play-state: paused; }
+@keyframes monte { to { transform: translateY(calc(-50% - 10px)); } }
+.avis__card {
+  position: relative;
+  background: var(--paper); border: 1px solid var(--hairline);
+  border-radius: var(--r-card); padding: 22px 22px 20px;
+  box-shadow: var(--sh-1);
+  transition: border-color .3s var(--ease), box-shadow .4s var(--ease), transform .4s var(--ease-out);
+  isolation: isolate;
+}
+.avis__card:hover { border-color: #bcd3e8; box-shadow: var(--sh-2); transform: translateY(-3px); }
+/* Même faisceau que les boutons : c'est la signature commune. */
+.avis__card::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; padding: 1.5px;
+  background: conic-gradient(from var(--ang), transparent 0 72%, var(--blue) 88%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .35s var(--ease);
+  animation: faisceau 2.4s linear infinite; pointer-events: none;
+}
+.avis__card:hover::after { opacity: 1; }
+.avis__quote { font-size: 15px; line-height: 1.6; color: var(--ink); }
+.avis__quote::before { content: '« '; color: var(--blue); font-weight: var(--fw-extra); }
+.avis__quote::after  { content: ' »'; color: var(--blue); font-weight: var(--fw-extra); }
+.avis__meta { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+.avis__avatar {
+  width: 38px; height: 38px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  background: var(--pebble); color: var(--cobalt);
+  font-size: 13px; font-weight: var(--fw-extra);
+}
+.avis__name { font-size: 14px; font-weight: var(--fw-bold); line-height: 1.3; }
+.avis__place { font-size: 12px; color: var(--slate); font-weight: var(--fw-semibold); }
+.avis__stars { display: flex; gap: 2px; color: var(--blue); margin-bottom: 10px; }
+.avis__stars svg { width: 14px; height: 14px; }
+/* Badge d'exemple : visible tant que de vrais avis n'ont pas remplacé ces cartes. */
+.avis__demo {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 10px; font-weight: var(--fw-extra); letter-spacing: .1em; text-transform: uppercase;
+  color: #8a5a00; background: #fff3d6; border: 1px solid #f2d48a;
+  padding: 3px 8px; border-radius: var(--r-pill);
+}
+/* Une colonne sur téléphone, deux sur tablette, trois au-delà : les colonnes
+   absentes sont retirées du flux, pas seulement rognées — elles n'animent rien. */
+.avis__col:nth-child(n+2) { display: none; }
+@media (min-width: 560px) {
+  .avis { grid-template-columns: 1fr 1fr; }
+  .avis__col:nth-child(2) { display: block; }
+}
+@media (min-width: 860px) {
+  .avis { grid-template-columns: repeat(3, 1fr); }
+  .avis__col:nth-child(3) { display: block; }
+}
+
+/* --- Réalisations : « Focus Cards » + tracé des schémas -------------------
+   La carte survolée s'avance, les autres s'effacent. Et chaque schéma se
+   dessine à l'apparition, trait après trait : le même geste que les lignes
+   du hero. */
+.work { transition: filter .45s var(--ease), opacity .45s var(--ease), transform .5s var(--ease-out), box-shadow .5s var(--ease), border-color .35s var(--ease); }
+@media (hover: hover) and (pointer: fine) {
+  .grid:has(.work:hover) .work:not(:hover) { filter: blur(2px) saturate(.85); opacity: .55; transform: scale(.985); }
+  .work:hover { transform: translateY(-8px) scale(1.012); box-shadow: var(--sh-3); }
+}
+.js .work__media .draw > * { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.js .is-in .work__media .draw > * {
+  animation: trace 1.5s var(--ease-out) forwards;
+  animation-delay: calc(var(--k, 0) * 140ms + .25s);
+}
+/* Le même faisceau sur la carte survolée. */
+.work::after {
+  content: ''; position: absolute; inset: 0; z-index: 2; border-radius: inherit; padding: 1.5px;
+  background: conic-gradient(from var(--ang), transparent 0 72%, var(--blue) 88%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .35s var(--ease);
+  animation: faisceau 2.4s linear infinite; pointer-events: none;
+}
+.work:hover::after { opacity: 1; }

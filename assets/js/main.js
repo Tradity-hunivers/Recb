@@ -80,36 +80,63 @@
      information que le visiteur doit lire. */
   function setupSwap() {
     if (!fine.matches || !motionOK()) return;
-    $$('[data-swap]').forEach(function (el) {
-      if (el.dataset.swap === 'done') return;
-      var texte = el.textContent.trim();
-      var frag = document.createDocumentFragment();
-      var boite = document.createElement('span');
-      boite.className = 'swap';
+    // Tous les boutons texte, plus les éléments marqués à la main. Seuls les
+    // nœuds texte sont transformés : les icônes SVG restent en place.
+    $$('[data-swap], .btn--ghost, .btn--dark, .btn--outline').forEach(function (el) {
+      if (el.dataset.swap === 'done' || el.dataset.swap === 'off') return;
+      // Un numéro de téléphone, un e-mail : on ne brouille jamais une
+      // information que le visiteur doit lire.
+      if (/\d[\d\s.]{6,}|@/.test(el.textContent)) return;
 
-      texte.split('').forEach(function (ch, i) {
-        if (ch === ' ') {
-          boite.appendChild(document.createTextNode(' '));
-          return;
-        }
-        var lettre = document.createElement('span');
-        lettre.className = 'swap__l';
-        lettre.style.setProperty('--li', i);
-        var haut = document.createElement('span');
-        haut.textContent = ch;
-        var bas = document.createElement('span');
-        bas.textContent = ch;
-        bas.setAttribute('aria-hidden', 'true');
-        lettre.appendChild(haut);
-        lettre.appendChild(bas);
-        boite.appendChild(lettre);
+      Array.prototype.slice.call(el.childNodes).forEach(function (noeud) {
+        if (noeud.nodeType !== 3 || !noeud.textContent.trim()) return;
+        var boite = document.createElement('span');
+        boite.className = 'swap';
+        noeud.textContent.trim().split('').forEach(function (ch, i) {
+          if (ch === ' ') {
+            boite.appendChild(document.createTextNode(' '));
+            return;
+          }
+          var lettre = document.createElement('span');
+          lettre.className = 'swap__l';
+          lettre.style.setProperty('--li', i);
+          var haut = document.createElement('span');
+          haut.textContent = ch;
+          var bas = document.createElement('span');
+          bas.textContent = ch;
+          bas.setAttribute('aria-hidden', 'true');
+          lettre.appendChild(haut);
+          lettre.appendChild(bas);
+          boite.appendChild(lettre);
+        });
+        el.replaceChild(boite, noeud);
       });
-
-      frag.appendChild(boite);
-      el.textContent = '';
-      el.appendChild(frag);
       el.dataset.swap = 'done';
     });
+  }
+
+  /* ------------------------------------------- 1 ter. projecteur du hero
+     Le curseur promène une lumière sur les tracés du hero : deux variables
+     posées sur la section, lues par la couche allumée et par le halo. Hors
+     écran, les 72 tracés animés sont mis en pause — ils ont un coût. */
+  function setupHero() {
+    var hero = $('.hero');
+    if (!hero) return;
+
+    if (fine.matches && motionOK()) {
+      var move = rafThrottle(function (x, y) {
+        var r = hero.getBoundingClientRect();
+        hero.style.setProperty('--mx', (x - r.left).toFixed(0) + 'px');
+        hero.style.setProperty('--my', (y - r.top).toFixed(0) + 'px');
+      });
+      hero.addEventListener('pointermove', function (e) { move(e.clientX, e.clientY); });
+    }
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        hero.classList.toggle('is-off', !entries[0].isIntersecting);
+      }, { threshold: 0 }).observe(hero);
+    }
   }
 
   /* ------------------------------------------------ 2. révélations au défilement */
@@ -266,7 +293,8 @@
   /* ------------------------------------------------- 8. boutons magnétiques */
   function setupMagnetic() {
     if (!fine.matches || !motionOK()) return;
-    $$('[data-magnetic]').forEach(function (el) {
+    // Tous les boutons sont magnétiques : c'est un seul geste, pas un privilège.
+    $$('.btn, [data-magnetic]').forEach(function (el) {
       var pull = parseFloat(el.dataset.magnetic) || 8;
 
       var move = rafThrottle(function (x, y) {
@@ -486,6 +514,7 @@
   function init() {
     setupReveals();
     setupSwap();
+    setupHero();
     setupScrollFX();
     setupHeader();
     setupDrawer();

@@ -46,13 +46,13 @@ p{color:var(--slate)}
 .btn--lg{padding:17px 30px;font-size:var(--t-lead)}
 .btn-row{display:flex;flex-wrap:wrap;gap:var(--s-2)}
 .lead{font-size:var(--t-lead);line-height:1.6;color:var(--slate)}
-.hero{position:relative;padding-top:calc(var(--header-h) + clamp(24px,6vw,72px));padding-bottom:clamp(48px,8vw,96px);overflow:hidden}
+.hero{position:relative;isolation:isolate;padding-top:calc(var(--header-h) + clamp(24px,6vw,72px));padding-bottom:clamp(48px,8vw,96px);overflow:hidden}
 .hero__grid{display:grid;gap:clamp(40px,6vw,64px);align-items:center}
 .hero h1{margin-bottom:var(--s-3);font-size:var(--t-display)}
 .hero .lead{margin-bottom:var(--s-4);max-width:54ch}
 .hero__badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--s-3)}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:var(--t-caption);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cobalt);background:#e6f0ff;padding:6px 14px;border-radius:var(--r-pill)}
-.blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.14;pointer-events:none;z-index:0}
+.blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.14;pointer-events:none;z-index:-1}.hero__paths{position:absolute;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none;color:var(--ink)}.hero__paths path{fill:none;stroke:currentColor;stroke-linecap:round;vector-effect:non-scaling-stroke}.hero__paths:not(.hero__paths--lit){-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.28),rgba(0,0,0,.5) 42%,#000 64%);mask-image:linear-gradient(90deg,rgba(0,0,0,.28),rgba(0,0,0,.5) 42%,#000 64%)}.js .hero__paths path{stroke-dasharray:1 1;stroke-dashoffset:1}.hero__paths--lit{color:var(--blue);-webkit-mask-image:radial-gradient(440px circle at 68% 55%,#000,transparent 72%);mask-image:radial-gradient(440px circle at 68% 55%,#000,transparent 72%)}.hero__spot{position:absolute;inset:0;z-index:-1;pointer-events:none}@media(hover:none),(max-width:859px){.hero__paths--lit,.hero__spot{display:none}.hero__paths path:nth-child(2n){display:none}.hero__paths:not(.hero__paths--lit){-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.22) 45%,rgba(0,0,0,.4) 100%);mask-image:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.22) 45%,rgba(0,0,0,.4) 100%)}}
 .blob--magenta{background:var(--magenta)}.blob--cyan{background:var(--cyan)}
 .js [data-reveal]{opacity:0;transform:translate3d(0,28px,0);filter:blur(6px);transition:opacity .8s var(--ease-out),transform .8s var(--ease-out),filter .8s var(--ease-out);transition-delay:var(--d,0ms)}
 .js [data-reveal="left"]{transform:translate3d(-36px,0,0)}
@@ -184,8 +184,8 @@ p{color:var(--slate)}
   <section class="section section--paper">
     <div class="wrap">
       <div class="grid grid--3" data-stagger="110">
-        <article class="card work" data-reveal>
-          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#e6f0ff"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g fill="none" stroke="#006bff" stroke-width="2.2" stroke-linejoin="round"><rect x="30" y="34" width="86" height="92" rx="4"/><path d="M40 44h66M40 56h48"/><rect x="150" y="34" width="120" height="44" rx="4"/><path d="M162 56h96"/><rect x="150" y="92" width="52" height="34" rx="4"/><rect x="218" y="92" width="52" height="34" rx="4"/></g></svg><span class="work__badge">Chantier type</span></div>
+        <article class="card card--spot work" data-reveal>
+          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#e6f0ff"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g class="draw" fill="none" stroke="#006bff" stroke-width="2.2" stroke-linejoin="round"><rect pathLength="1" style="--k:0" x="30" y="34" width="86" height="92" rx="4"/><path pathLength="1" style="--k:1" d="M40 44h66M40 56h48"/><rect pathLength="1" style="--k:2" x="150" y="34" width="120" height="44" rx="4"/><path pathLength="1" style="--k:3" d="M162 56h96"/><rect pathLength="1" style="--k:4" x="150" y="92" width="52" height="34" rx="4"/><rect pathLength="1" style="--k:5" x="218" y="92" width="52" height="34" rx="4"/></g></svg><span class="work__badge">Chantier type</span></div>
           <div class="work__body">
             <span class="mock__meta">Plomberie · Électricité · Carrelage · Peinture</span>
             <h2 style="font-size:var(--t-h3);margin:8px 0 10px">Salle de bain complète</h2>
@@ -196,8 +196,8 @@ p{color:var(--slate)}
             </div>
           </div>
         </article>
-        <article class="card work" data-reveal>
-          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#f0f3f8"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g fill="none" stroke="#0099ff" stroke-width="2.2" stroke-linejoin="round"><rect x="24" y="30" width="120" height="60" rx="3"/><rect x="24" y="100" width="120" height="50" rx="3"/><rect x="158" y="30" width="118" height="120" rx="3"/><path d="M84 90v10M144 60h14M144 120h14"/><circle cx="217" cy="90" r="18"/></g></svg><span class="work__badge">Chantier type</span></div>
+        <article class="card card--spot work" data-reveal>
+          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#f0f3f8"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g class="draw" fill="none" stroke="#0099ff" stroke-width="2.2" stroke-linejoin="round"><rect pathLength="1" style="--k:0" x="24" y="30" width="120" height="60" rx="3"/><rect pathLength="1" style="--k:1" x="24" y="100" width="120" height="50" rx="3"/><rect pathLength="1" style="--k:2" x="158" y="30" width="118" height="120" rx="3"/><path pathLength="1" style="--k:3" d="M84 90v10M144 60h14M144 120h14"/><circle pathLength="1" style="--k:4" cx="217" cy="90" r="18"/></g></svg><span class="work__badge">Chantier type</span></div>
           <div class="work__body">
             <span class="mock__meta">Peinture · Sols · Mise en sécurité</span>
             <h2 style="font-size:var(--t-h3);margin:8px 0 10px">Rafraîchissement avant mise en location</h2>
@@ -208,8 +208,8 @@ p{color:var(--slate)}
             </div>
           </div>
         </article>
-        <article class="card work" data-reveal>
-          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#eef2f8"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g fill="none" stroke="#004eba" stroke-width="2.2" stroke-linejoin="round"><path d="M26 130h248M26 130 70 40h160l44 90"/><rect x="96" y="66" width="52" height="64" rx="3"/><rect x="168" y="66" width="52" height="64" rx="3"/><circle cx="122" cy="34" r="7"/><circle cx="194" cy="34" r="7"/></g></svg><span class="work__badge">Chantier type</span></div>
+        <article class="card card--spot work" data-reveal>
+          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#eef2f8"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g class="draw" fill="none" stroke="#004eba" stroke-width="2.2" stroke-linejoin="round"><path pathLength="1" style="--k:0" d="M26 130h248M26 130 70 40h160l44 90"/><rect pathLength="1" style="--k:1" x="96" y="66" width="52" height="64" rx="3"/><rect pathLength="1" style="--k:2" x="168" y="66" width="52" height="64" rx="3"/><circle pathLength="1" style="--k:3" cx="122" cy="34" r="7"/><circle pathLength="1" style="--k:4" cx="194" cy="34" r="7"/></g></svg><span class="work__badge">Chantier type</span></div>
           <div class="work__body">
             <span class="mock__meta">Cloisons · Isolation · Sol · Éclairage</span>
             <h2 style="font-size:var(--t-h3);margin:8px 0 10px">Réagencement d'une pièce de vie</h2>
@@ -220,8 +220,8 @@ p{color:var(--slate)}
             </div>
           </div>
         </article>
-        <article class="card work" data-reveal>
-          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#e6f0ff"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g fill="none" stroke="#006bff" stroke-width="2.2" stroke-linejoin="round"><rect x="30" y="34" width="86" height="92" rx="4"/><path d="M40 44h66M40 56h48"/><rect x="150" y="34" width="120" height="44" rx="4"/><path d="M162 56h96"/><rect x="150" y="92" width="52" height="34" rx="4"/><rect x="218" y="92" width="52" height="34" rx="4"/></g></svg><span class="work__badge">Chantier type</span></div>
+        <article class="card card--spot work" data-reveal>
+          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#e6f0ff"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g class="draw" fill="none" stroke="#006bff" stroke-width="2.2" stroke-linejoin="round"><rect pathLength="1" style="--k:0" x="30" y="34" width="86" height="92" rx="4"/><path pathLength="1" style="--k:1" d="M40 44h66M40 56h48"/><rect pathLength="1" style="--k:2" x="150" y="34" width="120" height="44" rx="4"/><path pathLength="1" style="--k:3" d="M162 56h96"/><rect pathLength="1" style="--k:4" x="150" y="92" width="52" height="34" rx="4"/><rect pathLength="1" style="--k:5" x="218" y="92" width="52" height="34" rx="4"/></g></svg><span class="work__badge">Chantier type</span></div>
           <div class="work__body">
             <span class="mock__meta">Plomberie · Électricité · Faïence</span>
             <h2 style="font-size:var(--t-h3);margin:8px 0 10px">Cuisine : dépose et remise en état</h2>
@@ -232,8 +232,8 @@ p{color:var(--slate)}
             </div>
           </div>
         </article>
-        <article class="card work" data-reveal>
-          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#f0f3f8"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g fill="none" stroke="#0099ff" stroke-width="2.2" stroke-linejoin="round"><rect x="24" y="30" width="120" height="60" rx="3"/><rect x="24" y="100" width="120" height="50" rx="3"/><rect x="158" y="30" width="118" height="120" rx="3"/><path d="M84 90v10M144 60h14M144 120h14"/><circle cx="217" cy="90" r="18"/></g></svg><span class="work__badge">Chantier type</span></div>
+        <article class="card card--spot work" data-reveal>
+          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#f0f3f8"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g class="draw" fill="none" stroke="#0099ff" stroke-width="2.2" stroke-linejoin="round"><rect pathLength="1" style="--k:0" x="24" y="30" width="120" height="60" rx="3"/><rect pathLength="1" style="--k:1" x="24" y="100" width="120" height="50" rx="3"/><rect pathLength="1" style="--k:2" x="158" y="30" width="118" height="120" rx="3"/><path pathLength="1" style="--k:3" d="M84 90v10M144 60h14M144 120h14"/><circle pathLength="1" style="--k:4" cx="217" cy="90" r="18"/></g></svg><span class="work__badge">Chantier type</span></div>
           <div class="work__body">
             <span class="mock__meta">Séchage · Plâtrerie · Peinture</span>
             <h2 style="font-size:var(--t-h3);margin:8px 0 10px">Remise en état après dégât des eaux</h2>
@@ -244,8 +244,8 @@ p{color:var(--slate)}
             </div>
           </div>
         </article>
-        <article class="card work" data-reveal>
-          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#eef2f8"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g fill="none" stroke="#004eba" stroke-width="2.2" stroke-linejoin="round"><path d="M26 130h248M26 130 70 40h160l44 90"/><rect x="96" y="66" width="52" height="64" rx="3"/><rect x="168" y="66" width="52" height="64" rx="3"/><circle cx="122" cy="34" r="7"/><circle cx="194" cy="34" r="7"/></g></svg><span class="work__badge">Chantier type</span></div>
+        <article class="card card--spot work" data-reveal>
+          <div class="work__media"><svg viewBox="0 0 300 160" width="300" height="160" role="img" aria-label="Schéma de principe du chantier type" style="width:100%;height:auto"><rect width="300" height="160" fill="#eef2f8"/><g fill="none" stroke="#a6bbd1" stroke-width="1.6" stroke-linejoin="round" opacity=".28"><path d="M0 20h300M0 60h300M0 100h300M0 140h300M40 0v160M110 0v160M190 0v160M260 0v160"/></g><g class="draw" fill="none" stroke="#004eba" stroke-width="2.2" stroke-linejoin="round"><path pathLength="1" style="--k:0" d="M26 130h248M26 130 70 40h160l44 90"/><rect pathLength="1" style="--k:1" x="96" y="66" width="52" height="64" rx="3"/><rect pathLength="1" style="--k:2" x="168" y="66" width="52" height="64" rx="3"/><circle pathLength="1" style="--k:3" cx="122" cy="34" r="7"/><circle pathLength="1" style="--k:4" cx="194" cy="34" r="7"/></g></svg><span class="work__badge">Chantier type</span></div>
           <div class="work__body">
             <span class="mock__meta">Tous corps d'état</span>
             <h2 style="font-size:var(--t-h3);margin:8px 0 10px">Entretien courant sous forfait</h2>

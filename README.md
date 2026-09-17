@@ -150,9 +150,33 @@ variables CSS ; toute l'animation est dans le CSS.
 | `.card--spot` | halo lumineux qui suit le curseur |
 | `.blob[data-speed="0.08"]` | parallaxe des taches décoratives |
 
+Effets repris du catalogue 21st.dev, réécrits en natif (les originaux sont en
+React, Tailwind et Framer Motion) — tous réunis par un même langage, la lumière
+qui parcourt un tracé :
+
+| Où | Composant d'origine | Mécanique |
+|---|---|---|
+| Hero | Background Paths (Kokonut UI) + Cursor Spotlight | 72 tracés `<path>` générés, dessinés une fois (`dessine`), puis une dérive **composée** — pas de repeinture. Seule la couche `.hero__paths--lit` (24 tracés) anime `stroke-dashoffset` en continu, révélée par un masque radial que `--mx/--my` déplacent. Hors écran, `.hero.is-off` met tout en pause. Sur mobile, un tracé sur deux et pas de couche allumée. |
+| Boutons | Border Beam (magicui) | `.btn::after` : dégradé conique découpé en anneau par un masque, angle animé via `@property --ang`. Continu avec `.btn--live`, au survol sinon. Tous les boutons sont magnétiques ; les boutons texte relaient leurs lettres au survol, jamais un numéro ni un e-mail. |
+| Avis | Testimonials Columns | `.avis__col` défilent à l'infini (`monte`), contenu doublé pour boucler sans à-coup, pause au survol, 1 → 2 → 3 colonnes selon la largeur. |
+| Réalisations | Focus Cards (Aceternity) | `.grid:has(.work:hover)` floute les voisines ; chaque forme des schémas porte `pathLength="1"` et se dessine à l'apparition. |
+
+**Tenir le coût de peinture.** Animer `stroke-dashoffset` ou `opacity` sur un
+`<path>` repeint toute la zone à chaque image : c'est ce qui a saturé le rendu
+lors des premiers essais à 96 tracés animés. Règle à garder : les grandes
+couches ne bougent que par `transform`, seules de petites zones animent la
+peinture.
+
 Tout est désactivé sous `prefers-reduced-motion: reduce`, et les effets de
 survol sont réservés aux pointeurs fins (`hover: hover and pointer: fine`) :
 rien ne se déclenche au doigt sur mobile.
+
+**Les avis sont des exemples.** RECB82 n'a aucun avis publié à ce jour. Les six
+cartes de la section `#avis` sont des maquettes d'affichage, chacune badgée
+« Exemple », et la section le dit en clair. Publier des avis inventés en les
+présentant comme réels est interdit (pratique commerciale trompeuse) :
+remplacer les cartes par les avis Google réels avant toute mise en ligne, ou
+retirer la section.
 
 **Budget de performance à tenir** : page d'accueil sous 500 Ko tout compris,
 LCP sous 2,5 s en 4G. Toute image ajoutée doit être en WebP, dimensionnée à sa
