@@ -28,3 +28,10 @@
 
 # Ancien plan de site Wix
 /pages-sitemap.xml                  /sitemap.xml                            301
+
+# URL du site Cloudflare de preproduction (recb82.pages.dev), conservees pour
+# qu'aucun lien deja partage ne tombe dans le vide.
+/renovation-moissac                 /renovation-interieure-moissac          301
+/realisations/*                     /realisations                           301
+/amenagement-interieur-montauban    /renovation-appartement-montauban       301
+/peinture-montauban                 /peintre-montauban                      301

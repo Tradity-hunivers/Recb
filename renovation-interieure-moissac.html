@@ -52,15 +52,13 @@ p{color:var(--slate)}
 .hero .lead{margin-bottom:var(--s-4);max-width:54ch}
 .hero__badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--s-3)}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:var(--t-caption);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cobalt);background:#e6f0ff;padding:6px 14px;border-radius:var(--r-pill)}
-.blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.14;pointer-events:none;z-index:-1}.hero__paths{position:absolute;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none;color:var(--ink)}.hero__paths path{fill:none;stroke:currentColor;stroke-linecap:round;vector-effect:non-scaling-stroke}.hero__paths:not(.hero__paths--lit){-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.28),rgba(0,0,0,.5) 42%,#000 64%);mask-image:linear-gradient(90deg,rgba(0,0,0,.28),rgba(0,0,0,.5) 42%,#000 64%)}.js .hero__paths path{stroke-dasharray:1 1;stroke-dashoffset:1}.hero__paths--lit{color:var(--blue);-webkit-mask-image:radial-gradient(440px circle at 68% 55%,#000,transparent 72%);mask-image:radial-gradient(440px circle at 68% 55%,#000,transparent 72%)}.hero__spot{position:absolute;inset:0;z-index:-1;pointer-events:none}@media(hover:none),(max-width:859px){.hero__paths--lit,.hero__spot{display:none}.hero__paths path:nth-child(2n){display:none}.hero__paths:not(.hero__paths--lit){-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.22) 45%,rgba(0,0,0,.4) 100%);mask-image:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.22) 45%,rgba(0,0,0,.4) 100%)}}
-.blob--magenta{background:var(--magenta)}.blob--cyan{background:var(--cyan)}
-.js [data-reveal]{opacity:0;transform:translate3d(0,28px,0);filter:blur(6px);transition:opacity .8s var(--ease-out),transform .8s var(--ease-out),filter .8s var(--ease-out);transition-delay:var(--d,0ms)}
+.blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.14;pointer-events:none;z-index:-1}.logo__mark{background:#fff;border:1px solid var(--hairline);padding:3px;overflow:hidden}.logo__mark img{width:100%;height:100%;object-fit:contain}.hero--photo{position:relative;display:grid;grid-template-rows:auto 1fr;padding-top:var(--header-h);padding-bottom:clamp(28px,5vw,64px);background:#061f37;overflow:hidden;isolation:isolate;color:#fff}.hero__ba{position:relative;aspect-ratio:4/3;--pos:0%}.hero__ba img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 62%}.hero__after{position:absolute;inset:0;clip-path:inset(0 0 0 var(--pos))}.hero__scrim{display:none;position:absolute;inset:0;z-index:-1;pointer-events:none}.hero__content{position:relative;z-index:1;width:100%}.hero--photo h1{color:#fff;font-size:clamp(30px,1.4rem + 2.9vw,52px);margin-bottom:var(--s-3)}.hero__content{padding-block:clamp(26px,6vw,44px)}.hero--photo .lead{color:#d8e6f5;max-width:52ch;margin-bottom:var(--s-3)}.hero--photo .eyebrow{background:rgba(255,255,255,.14);color:#fff}.header--over:not(.is-stuck){background:linear-gradient(180deg,rgba(6,31,55,.55),transparent);backdrop-filter:none;-webkit-backdrop-filter:none}.header--over:not(.is-stuck) .nav__link,.header--over:not(.is-stuck) .logo{color:#fff}.header--over:not(.is-stuck) .burger{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3)}.header--over:not(.is-stuck) .burger__box span{background:#fff}.js [data-reveal]{opacity:0;transform:translate3d(0,28px,0);filter:blur(6px);transition:opacity .8s var(--ease-out),transform .8s var(--ease-out),filter .8s var(--ease-out);transition-delay:var(--d,0ms)}
 .js [data-reveal="left"]{transform:translate3d(-36px,0,0)}
 .js [data-reveal="right"]{transform:translate3d(36px,0,0)}
 .js [data-reveal="scale"]{transform:scale(.94)}
 .js [data-reveal].is-in{opacity:1;transform:none;filter:none}
 .js .callbar{transform:translateY(110%)}
-@media(min-width:860px){.blob{opacity:.3}.hero__grid{grid-template-columns:1.05fr .95fr}}
+@media(min-width:860px){.blob{opacity:.3}.hero__grid{grid-template-columns:1.05fr .95fr}.hero--photo{display:flex;align-items:center;min-height:min(90svh,800px);padding-top:calc(var(--header-h) + 24px)}.hero__ba{position:absolute;inset:0;z-index:-2;aspect-ratio:auto}.hero__content>div{max-width:620px}.hero__scrim{display:block;background:linear-gradient(95deg,rgba(6,31,55,.96) 0%,rgba(6,31,55,.9) 32%,rgba(6,31,55,.52) 52%,rgba(6,31,55,.1) 72%,rgba(6,31,55,.32) 100%),linear-gradient(180deg,rgba(6,31,55,.5) 0%,transparent 32%,rgba(6,31,55,.45) 100%)}}
 @media(min-width:1000px){:root{--header-h:76px}body{padding-bottom:0}.nav{display:block}.header__cta{display:flex}.burger{display:none}}
 @media(prefers-reduced-motion:reduce){.js [data-reveal]{opacity:1!important;transform:none!important;filter:none!important}.js .callbar{transform:none}}</style>
   <link rel="preload" href="/assets/css/styles.css" as="style" onload="this.rel='stylesheet';this.onload=null">
@@ -121,7 +119,7 @@ p{color:var(--slate)}
 <header class="header">
   <div class="wrap header__inner">
     <a class="logo" href="/" aria-label="RECB82, accueil">
-      <span class="logo__mark" aria-hidden="true">R</span>
+      <span class="logo__mark"><img src="/assets/img/logo-recb82-192.png" alt="" width="192" height="192" decoding="async"></span>
       <span>RECB<span class="logo__82">82</span></span>
     </a>
     <nav class="nav" aria-label="Navigation principale">
@@ -165,7 +163,7 @@ p{color:var(--slate)}
   <section class="hero">
     <div class="blob blob--cyan blob--float" style="width:360px;height:360px;top:-100px;right:-140px" data-speed="0.06"></div>
     <div class="blob blob--magenta blob--float" style="width:240px;height:240px;top:240px;left:-120px;animation-delay:-4s" data-speed="0.09"></div>
-    <div class="wrap" style="max-width:820px">
+    <div class="wrap hero__grid">
       <div>
         <div style="margin-bottom:20px"><nav aria-label="Fil d'Ariane"><ol class="crumbs">
       <li><a href="/">Accueil</a></li>
@@ -179,6 +177,13 @@ p{color:var(--slate)}
           <a class="btn btn--ghost btn--lg" href="/devis">Devis gratuit <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
       </div>
+      <div data-reveal="right"><div class="card" style="padding:0;overflow:hidden">
+          <img src="/assets/img/service-amenagement-900.webp"
+               srcset="/assets/img/service-amenagement-600.webp 600w, /assets/img/service-amenagement-900.webp 900w"
+               sizes="(min-width: 860px) 46vw, 92vw"
+               width="900" height="675" loading="lazy" decoding="async"
+               alt="Doublage et faux plafond en cours de pose sur un chantier d'aménagement intérieur" style="display:block;width:100%;height:auto">
+        </div></div>
     </div>
   </section>
   <section class="section">
@@ -246,7 +251,7 @@ p{color:var(--slate)}
     <div class="footer__grid">
       <div>
         <a class="logo" href="/" style="margin-bottom:16px">
-          <span class="logo__mark" aria-hidden="true">R</span>
+          <span class="logo__mark"><img src="/assets/img/logo-recb82-192.png" alt="" width="192" height="192" loading="lazy" decoding="async"></span>
           <span>RECB<span class="logo__82">82</span></span>
         </a>
         <p style="max-width:34ch;font-size:15px">Rénovation intérieure, plomberie et électricité. Implantés à Montauban et à Moissac, nous intervenons dans le Tarn-et-Garonne, le Lot-et-Garonne et la Haute-Garonne.</p>
@@ -262,8 +267,8 @@ p{color:var(--slate)}
           <li><a href="/plombier-montauban">Plombier à Montauban</a></li>
           <li><a href="/electricien-montauban">Électricien à Montauban</a></li>
           <li><a href="/renovation-salle-de-bain-montauban">Rénovation de salle de bain</a></li>
-          <li><a href="/#services">Aménagements intérieurs</a></li>
-          <li><a href="/#services">Peintures et finitions</a></li>
+          <li><a href="/renovation-appartement-montauban">Rénovation d'appartement</a></li>
+          <li><a href="/peintre-montauban">Peintre à Montauban</a></li>
           <li><a href="/#forfait">Forfait de maintenance</a></li>
         </ul>
       </div>

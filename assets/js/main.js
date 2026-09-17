@@ -115,30 +115,6 @@
     });
   }
 
-  /* ------------------------------------------- 1 ter. projecteur du hero
-     Le curseur promène une lumière sur les tracés du hero : deux variables
-     posées sur la section, lues par la couche allumée et par le halo. Hors
-     écran, les 72 tracés animés sont mis en pause — ils ont un coût. */
-  function setupHero() {
-    var hero = $('.hero');
-    if (!hero) return;
-
-    if (fine.matches && motionOK()) {
-      var move = rafThrottle(function (x, y) {
-        var r = hero.getBoundingClientRect();
-        hero.style.setProperty('--mx', (x - r.left).toFixed(0) + 'px');
-        hero.style.setProperty('--my', (y - r.top).toFixed(0) + 'px');
-      });
-      hero.addEventListener('pointermove', function (e) { move(e.clientX, e.clientY); });
-    }
-
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        hero.classList.toggle('is-off', !entries[0].isIntersecting);
-      }, { threshold: 0 }).observe(hero);
-    }
-  }
-
   /* ------------------------------------------------ 2. révélations au défilement */
   function setupReveals() {
     var items = $$('[data-reveal], [data-split], [data-count], .steps, .mock');
@@ -358,7 +334,7 @@
      Le champ est en `pointer-events: none` : il ne capte que le clavier, ce qui
      évite qu'il entre en concurrence avec le glissement géré ici. */
   function setupBeforeAfter() {
-    $$('.ba').forEach(function (el) {
+    $$('.ba, .hero__ba').forEach(function (el) {
       var range = $('.ba__range', el);
       var startX = 0, startY = 0, mode = null; // null · 'attente' · 'glisse' · 'defile'
 
@@ -382,6 +358,9 @@
       }
 
       el.addEventListener('pointerdown', function (e) {
+        // La révélation jouée au chargement s'efface dès que le visiteur prend
+        // la main, sinon elle écraserait sa position au prochain repaint.
+        if (el.classList.contains('hero__ba')) el.style.animation = 'none';
         startX = e.clientX;
         startY = e.clientY;
         if (e.pointerType === 'mouse') {
@@ -514,7 +493,6 @@
   function init() {
     setupReveals();
     setupSwap();
-    setupHero();
     setupScrollFX();
     setupHeader();
     setupDrawer();

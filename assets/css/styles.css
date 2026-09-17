@@ -191,14 +191,23 @@ strong { font-weight: var(--fw-bold); color: var(--ink); }
   isolation: isolate;
 }
 .btn svg { flex: none; }
-/* balayage lumineux au survol */
+/* Balayage lumineux permanent. Au survol il n'existait pas sur mobile, où il
+   n'y a pas de survol : il tourne maintenant en boucle, accéléré au survol. */
 .btn::before {
   content: ''; position: absolute; inset: 0; z-index: -1;
-  background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,.28) 50%, transparent 80%);
-  transform: translateX(-120%);
-  transition: transform .7s var(--ease-out);
+  background: linear-gradient(110deg, transparent 22%, var(--sheen, rgba(255,255,255,.34)) 50%, transparent 78%);
+  transform: translateX(-130%);
+  animation: balayage 4.6s var(--ease-out) infinite;
+  animation-delay: var(--bd, 0s);
 }
-.btn:hover::before { transform: translateX(120%); }
+@keyframes balayage {
+  0%, 64%   { transform: translateX(-130%); }
+  94%, 100% { transform: translateX(130%); }
+}
+.btn:hover::before { animation-duration: 1.5s; }
+/* Retour tactile franc : le doigt n'a que la pression pour sentir le bouton. */
+.btn:active { transform: translate3d(var(--tx, 0), var(--ty, 0), 0) scale(.965); transition-duration: .08s; }
+.btn--ghost { --sheen: rgba(0,107,255,.16); }
 
 .btn--primary { background: var(--blue); color: var(--paper); box-shadow: 0 6px 18px rgba(0,107,255,.28); }
 .btn--primary:hover { background: var(--blue-dark); box-shadow: 0 14px 32px rgba(0,107,255,.36); }
@@ -872,9 +881,10 @@ body.is-locked { overflow: hidden; }
   .lit .w { opacity: 1 !important; }
   .mock { --srx: 0deg !important; --ssc: 1 !important; }
   .paths path { stroke-dashoffset: 0 !important; }
-  /* Tracés du hero dessinés d'emblée, colonnes d'avis figées, faisceaux
-     immobiles, schémas complets : rien ne bouge, tout reste lisible. */
-  .hero__paths path { animation: none !important; stroke-dashoffset: 0 !important; opacity: .7; }
+  /* Colonnes d'avis figées, faisceaux et balayages immobiles, schémas complets,
+     comparateur posé à mi-course : rien ne bouge, tout reste lisible. */
+  .hero__ba { animation: none !important; --pos: 50% !important; }
+  .btn::before { animation: none !important; }
   .avis__track { animation: none !important; }
   .btn::after, .avis__card::after, .work::after { animation: none !important; }
   .btn--live { animation: none !important; }
@@ -983,84 +993,6 @@ body.is-locked { overflow: hidden; }
    réalisations (Focus Cards). Toujours en CSS et JS natifs, sans build.
    ========================================================================== */
 
-/* --- Hero : « Background Paths » ------------------------------------------
-   72 tracés générés par la formule de Kokonut UI. Chacun se dessine à
-   l'arrivée, puis une lumière dérive le long de la ligne en continu. Les
-   variables --t (durée) et --dl (départ) sont posées par tracé dans le HTML. */
-.hero__paths {
-  position: absolute; inset: 0; z-index: -1;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  color: var(--ink);
-}
-.hero__paths path {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;   /* épaisseur en pixels, quelle que soit l'échelle */
-  stroke-dasharray: 1 1;
-  stroke-dashoffset: 1;
-}
-/* La couche de base s'éclaircit derrière le texte, à gauche, et garde toute sa
-   présence derrière la maquette, à droite : les lignes décorent, le texte se lit. */
-.hero__paths:not(.hero__paths--lit) {
-  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.28), rgba(0,0,0,.5) 42%, #000 64%);
-  mask-image: linear-gradient(90deg, rgba(0,0,0,.28), rgba(0,0,0,.5) 42%, #000 64%);
-}
-/* Coût de peinture maîtrisé : animer stroke-dashoffset repeint tout le hero à
-   chaque image. La couche de base se dessine donc UNE fois, puis ne bouge plus
-   que par une transformation — composée par le GPU, sans repeindre. Seule la
-   couche allumée sous le curseur, réduite à 12 tracés, garde la lumière qui
-   voyage en continu. */
-.js .hero__paths path {
-  animation: dessine 2.6s var(--ease-out) var(--dl, 0s) both;
-}
-.js .hero__paths:not(.hero__paths--lit) {
-  transform-origin: 50% 50%;
-  will-change: transform;
-  animation: derive-douce 36s ease-in-out infinite alternate;
-}
-.js .hero__paths--lit path {
-  animation:
-    dessine 2.6s var(--ease-out) var(--dl, 0s) both,
-    derive var(--t, 14s) linear calc(var(--dl, 0s) + 2.6s) infinite;
-}
-@keyframes dessine { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes derive  { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -2; } }
-@keyframes derive-douce {
-  from { transform: translate3d(-10px, 6px, 0) scale(1); }
-  to   { transform: translate3d(12px, -8px, 0) scale(1.05); }
-}
-
-/* Hors écran, on arrête de peindre : 72 tracés animés ont un coût. */
-.hero.is-off .hero__paths, .hero.is-off .hero__paths path { animation-play-state: paused; }
-
-/* Couche allumée : un tracé sur trois, en bleu, révélé par un masque
-   circulaire qui suit le curseur (« Cursor Spotlight »). */
-.hero__paths--lit {
-  color: var(--blue);
-  -webkit-mask-image: radial-gradient(440px circle at var(--mx, 68%) var(--my, 55%), #000 0%, rgba(0,0,0,.6) 35%, transparent 72%);
-  mask-image: radial-gradient(440px circle at var(--mx, 68%) var(--my, 55%), #000 0%, rgba(0,0,0,.6) 35%, transparent 72%);
-}
-/* Lueur douce qui accompagne le projecteur — le halo que le curseur promène. */
-.hero__spot {
-  position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(420px circle at var(--mx, 68%) var(--my, 55%), rgba(0,107,255,.13), transparent 62%);
-}
-@media (hover: none), (max-width: 859px) {
-  .hero__paths--lit, .hero__spot { display: none; }
-  /* Un tracé sur deux suffit sur un petit écran, et coûte moitié moins ;
-     un peu plus épais pour rester visible à l'échelle d'un téléphone. */
-  .hero__paths path:nth-child(2n) { display: none; }
-  .hero__paths path { stroke-width: 1px; }
-  /* Sur un écran étroit le texte occupe toute la largeur : le fondu devient
-     vertical, plus léger au milieu, là où le paragraphe se lit. */
-  .hero__paths:not(.hero__paths--lit) {
-    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.22) 45%, rgba(0,0,0,.4) 100%);
-    mask-image: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.22) 45%, rgba(0,0,0,.4) 100%);
-  }
-}
-
 /* --- Boutons : « Border Beam » --------------------------------------------
    Un faisceau parcourt la bordure. Il tourne en continu sur le bouton d'appel
    du hero, et s'allume au survol partout ailleurs. Le dégradé conique est
@@ -1085,6 +1017,10 @@ body.is-locked { overflow: hidden; }
   pointer-events: none;
 }
 .btn:hover::after, .btn:focus-visible::after, .btn--live::after { opacity: 1; }
+/* Sans survol possible, le faisceau reste allumé : c'est là qu'il sert le plus. */
+@media (hover: none) {
+  .btn::after { opacity: 1; }
+}
 @keyframes faisceau { to { --ang: 360deg; } }
 .btn--primary { --beam: #ffffff; }
 .btn--dark    { --beam: var(--cyan); }
@@ -1194,3 +1130,196 @@ body.is-locked { overflow: hidden; }
   animation: faisceau 2.4s linear infinite; pointer-events: none;
 }
 .work:hover::after { opacity: 1; }
+
+
+/* ==========================================================================
+   17. HERO PHOTOGRAPHIQUE
+   Le chantier lui-même en pleine page : l'avant se change en après au
+   chargement, puis le visiteur fait glisser. Photos réelles de RECB82.
+   ========================================================================== */
+/* Mobile : la photo occupe une bande en haut, le texte s'installe dessous sur
+   un aplat sombre. Un paragraphe posé sur une salle de bain claire ne se lit
+   pas, quelle que soit la force du voile. */
+.hero--photo {
+  position: relative;
+  display: grid; grid-template-rows: auto 1fr;
+  padding-top: var(--header-h);
+  padding-bottom: clamp(28px, 5vw, 64px);
+  background: #061f37;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--paper);
+}
+.hero__ba {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  cursor: ew-resize;
+  touch-action: pan-y;
+  --pos: 0%;
+}
+.hero__ba img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 62%;
+}
+.hero__after { position: absolute; inset: 0; clip-path: inset(0 0 0 var(--pos)); }
+.js .hero__ba { animation: revele-ba 2.2s var(--ease-out) .35s both; }
+@keyframes revele-ba { from { --pos: 0%; } to { --pos: 52%; } }
+@property --pos { syntax: '<percentage>'; inherits: true; initial-value: 0%; }
+
+.hero__handle {
+  position: absolute; top: 0; bottom: 0; left: var(--pos);
+  width: 2px; background: rgba(255,255,255,.9);
+  box-shadow: 0 0 22px rgba(0,0,0,.35);
+  z-index: 2; pointer-events: none;
+}
+.hero__knob {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(255,255,255,.96); color: var(--ink);
+  display: grid; place-items: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,.3);
+}
+.hero__tag {
+  position: absolute; z-index: 3; bottom: 14px;
+  padding: 6px 14px; border-radius: var(--r-pill);
+  font-size: var(--t-caption); font-weight: var(--fw-extra);
+  letter-spacing: .1em; text-transform: uppercase;
+  background: rgba(6,31,55,.72); color: #fff;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.hero__tag--avant { left: var(--gutter); }
+.hero__tag--apres { right: var(--gutter); background: rgba(0,107,255,.88); }
+
+/* Voile sombre : le texte se lit sur une photo claire de salle de bain. */
+.hero__scrim {
+  /* Sans objet tant que la photo est en bande : il ne sert qu'en plein cadre. */
+  display: none;
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(6,31,55,.62) 0%, rgba(6,31,55,.25) 28%, rgba(6,31,55,.78) 62%, rgba(6,31,55,.96) 100%);
+}
+/* Plus contenu que le titre de l'ancien hero : à 80 px il débordait sur quatre
+   lignes et forçait la photo à se recadrer trop près. */
+.hero--photo h1 {
+  color: var(--paper);
+  font-size: clamp(30px, 1.4rem + 2.9vw, 52px);
+  margin-bottom: var(--s-3);
+}
+.hero__content { padding-block: clamp(26px, 6vw, 44px); }
+.hero--photo .lead { color: #d8e6f5; max-width: 52ch; margin-bottom: var(--s-3); }
+.hero--photo .eyebrow { background: rgba(255,255,255,.14); color: #fff; backdrop-filter: blur(6px); }
+.hero--photo .eyebrow::before { background: #6cb4ff; }
+.hero__content { position: relative; z-index: 1; width: 100%; }
+.hero--photo .hero__proof { border-top-color: rgba(255,255,255,.22); }
+.hero--photo .hero__proof-item b { color: var(--paper); }
+.hero--photo .hero__proof-item span { color: #a9c4dd; }
+.hero--photo .btn--ghost { background: rgba(255,255,255,.96); border-color: transparent; }
+.hero__legende {
+  margin-top: var(--s-3); font-size: var(--t-caption); color: #9fbbd6;
+  display: flex; align-items: center; gap: 8px;
+}
+/* Sur grand écran la photo repasse en plein cadre derrière le texte : le voile
+   latéral suffit alors, la colonne de texte n'occupant que la moitié gauche. */
+@media (min-width: 860px) {
+  .hero--photo {
+    display: flex; align-items: center;
+    min-height: min(90svh, 800px);
+    padding-top: calc(var(--header-h) + 24px);
+  }
+  .hero__ba { position: absolute; inset: 0; z-index: -2; aspect-ratio: auto; }
+  .hero__scrim {
+    display: block;
+    background:
+      linear-gradient(95deg, rgba(6,31,55,.96) 0%, rgba(6,31,55,.9) 32%, rgba(6,31,55,.52) 52%, rgba(6,31,55,.1) 72%, rgba(6,31,55,.32) 100%),
+      linear-gradient(180deg, rgba(6,31,55,.5) 0%, transparent 32%, rgba(6,31,55,.45) 100%);
+  }
+  .hero__content > div { max-width: 620px; }
+  /* Le repère « Avant » tomberait derrière le voile : seul « Après » reste,
+     du côté où la photo se voit vraiment. */
+  .hero__tag { top: calc(var(--header-h) + 20px); bottom: auto; }
+  .hero__tag--avant { display: none; }
+}
+
+@media (hover: none) {
+  .hero__knob { width: 44px; height: 44px; }
+}
+
+/* En-tête posé sur la photo : transparent en haut, plein une fois décollé. */
+.header--over:not(.is-stuck) {
+  background: linear-gradient(180deg, rgba(6,31,55,.55), transparent);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.header--over:not(.is-stuck) .nav__link,
+.header--over:not(.is-stuck) .logo { color: var(--paper); }
+.header--over:not(.is-stuck) .nav__link::after { background: rgba(255,255,255,.16); }
+.header--over:not(.is-stuck) .burger { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.3); }
+.header--over:not(.is-stuck) .burger__box span { background: var(--paper); }
+
+/* Logo : la marque réelle de l'entreprise, sur pastille blanche pour tenir
+   aussi bien sur l'en-tête clair que sur la photo sombre. */
+.logo__mark {
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  padding: 3px;
+  overflow: hidden;
+}
+.logo__mark img { width: 100%; height: 100%; object-fit: contain; }
+.logo:hover .logo__mark { background: var(--paper); transform: rotate(-6deg) scale(1.06); }
+
+/* --------------------------------------------------------------------------
+   18. PHOTOS DE CHANTIER DANS LES SECTIONS
+   -------------------------------------------------------------------------- */
+/* Cartes de prestation : la photo remplace l'aplat, l'icône reste en pastille. */
+.service--photo { padding: 0; overflow: hidden; }
+.service__photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--pebble); }
+.service__photo img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease-out); }
+.card:hover .service__photo img { transform: scale(1.06); }
+.service__photo .service__icon {
+  position: absolute; left: 14px; bottom: 14px;
+  background: rgba(255,255,255,.94); backdrop-filter: blur(6px);
+}
+.service--photo > .service__body { padding: var(--s-3); display: flex; flex-direction: column; gap: var(--s-2); flex: 1; }
+
+/* Réalisations : vraies photos avant/après, cadrées à l'identique. */
+.work__media { aspect-ratio: 4 / 3; }
+.work__media img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease-out); }
+.work:hover .work__media img { transform: scale(1.06); }
+
+/* Zone d'intervention : la carte réelle, et des pastilles compactes — la liste
+   pleine taille occupait un écran entier de téléphone pour rien. */
+.carte {
+  position: relative; border-radius: var(--r-card); overflow: hidden;
+  border: 1px solid var(--hairline); box-shadow: var(--sh-1);
+}
+.carte img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 5 / 2; }
+.carte__pin {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -100%);
+  color: var(--blue); filter: drop-shadow(0 4px 8px rgba(11,53,88,.35));
+}
+.carte__pin svg { width: 34px; height: 34px; }
+.carte__adresse {
+  position: absolute; left: 10px; right: 10px; bottom: 10px;
+  background: rgba(255,255,255,.95); backdrop-filter: blur(8px);
+  border-radius: 9px; padding: 8px 12px;
+  font-size: 13px; font-weight: var(--fw-bold); line-height: 1.35;
+}
+.carte__adresse span { display: block; font-weight: var(--fw-regular); color: var(--slate); font-size: 11.5px; }
+/* Le repere se cale au-dessus du bandeau d'adresse, sinon il disparait dessous. */
+.carte__pin { top: 38%; }
+/* Seize communes en pastilles pleine taille occupaient un ecran entier de
+   telephone. Densifiees, et sans repere repete seize fois. */
+.towns--compact { gap: 6px; }
+.towns--compact .town { padding: 5px 11px; font-size: 12.5px; font-weight: var(--fw-semibold); }
+.towns--compact .town svg { display: none; }
+@media (min-width: 560px) {
+  .towns--compact .town svg { display: block; width: 12px; height: 12px; }
+}
+
+/* Le bouton de la colonne méthode restait orphelin sous l'en-tête sur mobile :
+   il n'apparaît que là où la colonne est réellement collante. */
+.steps-cta { display: none; }
+@media (min-width: 1000px) { .steps-cta { display: flex; } }
+
+/* Aucune ancre ne doit atterrir sous l'en-tête fixe. */
+[id] { scroll-margin-top: calc(var(--header-h) + 16px); }

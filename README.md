@@ -23,9 +23,13 @@ merci.html                                Confirmation d'envoi (noindex)
 mentions-legales.html
 politique-confidentialite.html
 
+peintre-montauban.html                    Page métier-ville
+renovation-appartement-montauban.html     Page métier-ville
+
 assets/css/styles.css                     Feuille unique
 assets/js/main.js                         Animations et interactions
 assets/fonts/manrope-*.woff2              Police auto-hébergée (variable 400→800)
+assets/img/                               Logo et photos de chantier de RECB82
 
 functions/api/devis.js                    Réception du formulaire (Cloudflare Pages Function)
 _headers                                  En-têtes de sécurité et de cache
@@ -101,13 +105,10 @@ premiers sont des **obligations légales**.
       consommation. Le fichier `mentions-legales.html` contient un encadré qui
       liste précisément ce qui manque — **le remplacer par les vraies valeurs**,
       l'encadré n'a pas vocation à rester en ligne.
-- [ ] **Photos de chantiers.** Le site n'utilise aucune photo : les visuels sont
-      des schémas de principe, volontairement non photographiques. C'est le
-      point le plus coûteux en conversion. Dès que RECB82 fournit des photos de
-      ses propres réalisations, elles remplacent les schémas de
-      `realisations.html` et alimentent le curseur avant/après de la page salle
-      de bain. **Ne jamais y mettre de banque d'images** : ça se repère, et ça
-      dit qu'on n'a rien à montrer.
+- [x] **Photos de chantiers.** ~~Le site n'utilise aucune photo.~~ Réglé :
+      logo, photos de métier et chantiers avant/après récupérés depuis
+      `recb82.pages.dev` (site Cloudflare du client) et placés dans
+      `assets/img/`. Aucune image de banque, uniquement des chantiers RECB82.
 - [ ] **Coordonnées GPS.** Le JSON-LD utilise `44.0181 / 1.3550`, position
       approchée du centre de Montauban. À remplacer par la position exacte
       relevée sur la fiche Google Business Profile.
@@ -156,10 +157,16 @@ qui parcourt un tracé :
 
 | Où | Composant d'origine | Mécanique |
 |---|---|---|
-| Hero | Background Paths (Kokonut UI) + Cursor Spotlight | 72 tracés `<path>` générés, dessinés une fois (`dessine`), puis une dérive **composée** — pas de repeinture. Seule la couche `.hero__paths--lit` (24 tracés) anime `stroke-dashoffset` en continu, révélée par un masque radial que `--mx/--my` déplacent. Hors écran, `.hero.is-off` met tout en pause. Sur mobile, un tracé sur deux et pas de couche allumée. |
-| Boutons | Border Beam (magicui) | `.btn::after` : dégradé conique découpé en anneau par un masque, angle animé via `@property --ang`. Continu avec `.btn--live`, au survol sinon. Tous les boutons sont magnétiques ; les boutons texte relaient leurs lettres au survol, jamais un numéro ni un e-mail. |
+| Hero | Image Comparison, sur photo réelle | Le chantier lui-même : `.hero__ba` superpose l'avant et l'après du même cadrage, `--pos` s'anime de 0 à 52 % au chargement puis le visiteur fait glisser. **Photo en bande au-dessus du texte sous 860 px** : un paragraphe posé sur une salle de bain claire ne se lit pas, quel que soit le voile. Au-dessus, plein cadre avec voile latéral. |
+| Boutons | Border Beam (magicui) + balayage | `.btn::after` : dégradé conique découpé en anneau par un masque, angle animé via `@property --ang`. **Sous `@media (hover: none)` le faisceau reste allumé** — sans cela, aucun effet de bouton n'existait sur téléphone. Le balayage lumineux tourne en boucle (`balayage`, 4,6 s) au lieu d'attendre un survol, et `:active` donne un retour à la pression. |
 | Avis | Testimonials Columns | `.avis__col` défilent à l'infini (`monte`), contenu doublé pour boucler sans à-coup, pause au survol, 1 → 2 → 3 colonnes selon la largeur. |
 | Réalisations | Focus Cards (Aceternity) | `.grid:has(.work:hover)` floute les voisines ; chaque forme des schémas porte `pathLength="1"` et se dessine à l'apparition. |
+
+**Photos : d'où elles viennent.** Logo, photos de métier et chantiers
+avant/après proviennent de `recb82.pages.dev`, le site Cloudflare de RECB82.
+Les paires avant/après sont cadrées à l'identique, ce qui rend le comparateur
+possible. Les descriptions de chantier (durées, corps d'état, libellés) sont
+reprises des pages réalisations de ce même site — rien n'est inventé.
 
 **Tenir le coût de peinture.** Animer `stroke-dashoffset` ou `opacity` sur un
 `<path>` repeint toute la zone à chaque image : c'est ce qui a saturé le rendu
