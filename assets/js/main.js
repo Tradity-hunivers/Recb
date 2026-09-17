@@ -489,6 +489,64 @@
     maj();
   }
 
+  /* ------------------------------------------------------- 15. carrousels
+     Le défilement avec accroche fait tout le travail : les flèches ne font que
+     pousser la piste d'un élément, et les points suivent la position réelle.
+     Sans JavaScript, la piste reste défilable au doigt et à la molette. */
+  function setupCarrousels() {
+    $$('[data-carrousel]').forEach(function (car) {
+      var piste = $('.carrousel__piste', car);
+      var items = $$('.carrousel__item', piste);
+      var prev = $('.carrousel__nav--prev', car);
+      var next = $('.carrousel__nav--next', car);
+      var points = $$('.carrousel__point', car);
+      if (!piste || items.length < 2) return;
+
+      function depart(i) {
+        // Position de defilement qui amene la photo i contre le bord gauche.
+        return items[i].offsetLeft - items[0].offsetLeft;
+      }
+
+      function fin() {
+        return piste.scrollWidth - piste.clientWidth;
+      }
+
+      function courant() {
+        // La photo calee a gauche, et non la plus centree : au repos la piste
+        // n'est pas centree, et viser le centre designait deja la deuxieme.
+        if (piste.scrollLeft >= fin() - 2) return items.length - 1;
+        var best = 0, dmin = Infinity;
+        items.forEach(function (it, i) {
+          var d = Math.abs(depart(i) - piste.scrollLeft);
+          if (d < dmin - 1) { dmin = d; best = i; }
+        });
+        return best;
+      }
+
+      function etat() {
+        var i = courant();
+        points.forEach(function (pt, k) { pt.setAttribute('aria-current', k === i ? 'true' : 'false'); });
+        if (prev) prev.disabled = piste.scrollLeft <= 2;
+        if (next) next.disabled = piste.scrollLeft >= fin() - 2;
+      }
+
+      function vers(i) {
+        i = Math.max(0, Math.min(items.length - 1, i));
+        piste.scrollTo({
+          left: Math.min(depart(i), fin()),
+          behavior: motionOK() ? 'smooth' : 'auto',
+        });
+      }
+
+      if (prev) prev.addEventListener('click', function () { vers(courant() - 1); });
+      if (next) next.addEventListener('click', function () { vers(courant() + 1); });
+      points.forEach(function (pt, k) { pt.addEventListener('click', function () { vers(k); }); });
+      piste.addEventListener('scroll', rafThrottle(etat), { passive: true });
+      window.addEventListener('resize', rafThrottle(etat), { passive: true });
+      etat();
+    });
+  }
+
   /* ------------------------------------------------------------- démarrage */
   function init() {
     setupReveals();
@@ -502,6 +560,7 @@
     setupParallax();
     setupFaq();
     setupBeforeAfter();
+    setupCarrousels();
     setupAnchors();
     setupForm();
     document.documentElement.classList.add('js-ready');

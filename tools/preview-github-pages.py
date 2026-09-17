@@ -53,6 +53,25 @@ def reecrire(html, base):
         return '%s="%s%s/%s"' % (attr, base, chemin.rstrip('/'), suffixe)
 
     html = re.sub(r'\b(href|src|action)="(/[^"]*)"', lien, html)
+
+    # `srcset` liste plusieurs URL séparées par des virgules : la règle
+    # ci-dessus ne le voit pas, et le navigateur lui donne la priorité sur
+    # `src`. Sans cette reprise, toutes les photos se cassent alors que `src`
+    # paraît juste.
+    def jeu(m):
+        sortie = []
+        for cand in m.group(1).split(','):
+            cand = cand.strip()
+            if not cand:
+                continue
+            morceaux = cand.split()
+            if morceaux[0].startswith('/'):
+                morceaux[0] = base + morceaux[0]
+            sortie.append(' '.join(morceaux))
+        return 'srcset="%s"' % ', '.join(sortie)
+
+    html = re.sub(r'srcset="([^"]*)"', jeu, html)
+
     # Polices appelées depuis le CSS critique inséré dans le <head>.
     html = html.replace("url('/assets/", "url('%s/assets/" % base)
 

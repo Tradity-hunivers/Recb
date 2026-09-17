@@ -248,6 +248,11 @@ strong { font-weight: var(--fw-bold); color: var(--ink); }
 .section--ink { background: var(--ink); color: var(--paper); }
 .section--ink p, .section--ink .lead { color: #b9cee4; }
 .section--tight { padding-block: clamp(40px, 6vw, 72px); }
+/* Sous 860 px, .split-2 n'est pas une grille : ses deux colonnes s'empilent
+   sans le moindre écart et le contenu de la seconde vient coller la première. */
+.split-2 > * + * { margin-top: clamp(28px, 7vw, 40px); }
+@media (min-width: 860px) { .split-2 > * + * { margin-top: 0; } }
+
 .stack > * + * { margin-top: var(--s-2); }
 .stack-lg > * + * { margin-top: var(--s-3); }
 .grid { display: grid; gap: var(--s-3); }
@@ -1323,3 +1328,81 @@ body.is-locked { overflow: hidden; }
 
 /* Aucune ancre ne doit atterrir sous l'en-tête fixe. */
 [id] { scroll-margin-top: calc(var(--header-h) + 16px); }
+
+/* ==========================================================================
+   19. CARROUSEL DE PHOTOS
+   Défilement natif avec accroche : il fonctionne au doigt, à la molette et
+   sans JavaScript. Les flèches et les points ne font qu'ajouter du confort.
+   ========================================================================== */
+.carrousel { position: relative; }
+.carrousel__piste {
+  display: flex; gap: var(--s-2);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+  /* La photo entière tient dans la vue, la suivante amorce à droite. */
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+  scroll-padding-inline-start: var(--gutter);
+}
+.carrousel__piste::-webkit-scrollbar { display: none; }
+.carrousel__item {
+  flex: 0 0 min(86%, 420px);
+  /* Accroche au bord gauche : au repos la premiere photo est bien la
+     premiere, et « photo 2 sur 5 » designe ce que l'on voit a gauche. */
+  scroll-snap-align: start;
+  margin: 0;
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  box-shadow: var(--sh-1);
+}
+.carrousel__item img {
+  width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block;
+  background: var(--pebble);
+}
+.carrousel__item figcaption {
+  padding: 14px 16px;
+  font-size: 14px; line-height: 1.5; color: var(--slate);
+}
+.carrousel__nav {
+  position: absolute; top: calc(50% - 30px); z-index: 2;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: none; place-items: center;
+  background: rgba(255,255,255,.96); color: var(--ink);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--sh-2);
+  transition: transform .3s var(--spring), color .25s var(--ease), opacity .25s var(--ease);
+}
+.carrousel__nav:hover { transform: scale(1.08); color: var(--blue); }
+.carrousel__nav[disabled] { opacity: .35; pointer-events: none; }
+.carrousel__nav--prev { left: -6px; }
+.carrousel__nav--next { right: -6px; }
+@media (hover: hover) and (pointer: fine) {
+  .carrousel__nav { display: grid; }
+}
+.carrousel__points {
+  display: flex; justify-content: center; gap: 0;
+  /* L'écart entre les points vient désormais de leur zone touchable, et la
+     marge du dessus rattrape les 8 px de rembourrage. */
+  margin-top: calc(var(--s-2) - 8px);
+}
+.carrousel__point {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--hairline);
+  /* Le point reste petit, la zone touchable fait 23 px : viser une pastille
+     de 7 px au doigt est intenable. */
+  padding: 8px 7px; box-sizing: content-box; background-clip: content-box;
+  transition: background-color .3s var(--ease), width .3s var(--ease-out);
+}
+.carrousel__point[aria-current="true"] { background: var(--blue); background-clip: content-box; width: 22px; border-radius: 99px; }
+.carrousel__legende {
+  margin-top: var(--s-2); font-size: var(--t-caption); color: var(--slate);
+  display: flex; align-items: center; gap: 8px;
+}
+@media (min-width: 860px) {
+  .carrousel__item { flex-basis: min(60%, 460px); }
+}
