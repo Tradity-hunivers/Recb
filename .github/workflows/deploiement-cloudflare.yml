@@ -1,0 +1,94 @@
+# Déploie le site en production sur Cloudflare Pages, à chaque push.
+#
+# Les fichiers du dépôt sont publiés tels quels : pas de build, pas de
+# transformation. Cloudflare sert « /devis » depuis devis.html, exécute le
+# dossier functions/ et applique _headers et _redirects.
+#
+# ── Deux chaînes possibles, une seule à la fois ───────────────────────────
+# Soit le projet Pages est connecté au dépôt depuis le tableau de bord
+# Cloudflare (Workers & Pages > Create > Pages > Connect to Git), soit ce
+# workflow s'en charge. Les deux ensemble se marchent dessus : si vous
+# branchez la connexion Git, retirez « push: » ci-dessous pour ne garder que
+# le déclenchement manuel.
+#
+# ── Ce qu'il faut créer une fois ──────────────────────────────────────────
+# 1. Un projet Pages qui reçoit les dépôts. Tableau de bord Cloudflare >
+#    Workers & Pages > Create > Pages > Upload assets, nommez-le, envoyez
+#    n'importe quel fichier pour l'initialiser. Le nom choisi doit être
+#    repris dans la variable CLOUDFLARE_PAGES_PROJECT ci-dessous, sinon
+#    c'est « recb82-nouveau-site » qui sert.
+#    ⚠ Ne reprenez pas le nom du projet qui sert déjà recb82.pages.dev tant
+#    que vous ne voulez pas remplacer le site actuel.
+# 2. Deux secrets de dépôt : Settings > Secrets and variables > Actions.
+#      CLOUDFLARE_ACCOUNT_ID  page d'accueil du compte Cloudflare, colonne
+#                             de droite, ou dans l'URL du tableau de bord
+#      CLOUDFLARE_API_TOKEN   My Profile > API Tokens > Create Token,
+#                             modèle « Edit Cloudflare Workers »
+# 3. Facultatif, une variable de dépôt (même écran, onglet Variables) :
+#      CLOUDFLARE_PAGES_PROJECT   nom du projet Pages visé
+#
+# ── Ce qui ne se règle pas ici ────────────────────────────────────────────
+# Les variables d'envoi du formulaire de devis (RESEND_API_KEY, DEVIS_TO,
+# DEVIS_FROM) se définissent sur le projet Pages lui-même, section
+# Settings > Environment variables. Tant qu'elles manquent, le formulaire
+# affiche un message clair au lieu de perdre la demande.
+
+name: Déploiement Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+      - claude/renovation-montauban-animated-a8n6ue
+  workflow_dispatch:
+
+# Le dépôt est seulement lu ; le jeton Cloudflare fait le reste.
+permissions:
+  contents: read
+
+# Un déploiement à la fois, sans annuler celui qui est en cours : Cloudflare
+# garde la version précédente en ligne tant que la nouvelle n'est pas prête.
+concurrency:
+  group: cloudflare-pages
+  cancel-in-progress: false
+
+jobs:
+  deployer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v5
+
+      # Rien d'inutile dans le paquet envoyé : ces dossiers ne servent qu'au
+      # dépôt, à l'aperçu GitHub Pages ou aux archives de l'ancien site.
+      - name: Préparer le contenu à publier
+        run: |
+          rm -rf _site
+          mkdir _site
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='tools' \
+            --exclude='archive' \
+            --exclude='README.md' \
+            --exclude='_site' \
+            ./ _site/
+          echo "Pages publiées :"
+          ls _site/*.html
+          test -f _site/functions/api/devis.js || {
+            echo "La fonction du formulaire est absente du paquet." >&2
+            exit 1
+          }
+
+      - name: Publier sur Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # --branch décide de l'URL : la branche de production du projet
+          # donne le domaine principal, toute autre branche une préversion
+          # à son propre sous-domaine. Pratique pour faire relire avant.
+          command: >-
+            pages deploy _site
+            --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT || 'recb82-nouveau-site' }}
+            --branch=${{ github.ref_name }}

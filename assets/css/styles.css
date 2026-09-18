@@ -1110,6 +1110,49 @@ body.is-locked { overflow: hidden; }
   .avis__col:nth-child(3) { display: block; }
 }
 
+/* --- Avis : un témoignage vérifié, photo à l'appui ------------------------
+   Les colonnes défilantes supposaient six avis. Il y en a un de vérifiable :
+   une seule pièce, mise en avant, vaut mieux que six inventées. */
+.temoin {
+  display: grid; gap: 0;
+  margin: 0 auto; max-width: 880px;
+  background: var(--paper); border: 1px solid var(--hairline);
+  border-radius: var(--r-card); overflow: hidden;
+  box-shadow: var(--sh-1);
+  transition: border-color .3s var(--ease), box-shadow .4s var(--ease), transform .4s var(--ease-out);
+  isolation: isolate;
+}
+.temoin:hover { border-color: #bcd3e8; box-shadow: var(--sh-2); transform: translateY(-3px); }
+/* Le même faisceau que les boutons et les cartes : signature commune. */
+.temoin::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; padding: 1.5px;
+  background: conic-gradient(from var(--ang), transparent 0 72%, var(--blue) 88%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .35s var(--ease);
+  animation: faisceau 2.4s linear infinite; pointer-events: none;
+}
+.temoin { position: relative; }
+.temoin:hover::after { opacity: 1; }
+.temoin__photo {
+  width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block;
+  background: var(--pebble);
+}
+.temoin__texte { padding: 24px 22px 22px; }
+.temoin__quote {
+  margin: 0; font-size: clamp(17px, 2.4vw, 20px); line-height: 1.55;
+  font-weight: var(--fw-semibold); color: var(--ink);
+}
+.temoin__quote::before { content: '« '; color: var(--blue); font-weight: var(--fw-extra); }
+.temoin__quote::after  { content: ' »'; color: var(--blue); font-weight: var(--fw-extra); }
+.temoin__lien { margin-top: var(--s-3); text-align: center; }
+@media (min-width: 860px) {
+  .temoin { grid-template-columns: 420px 1fr; align-items: stretch; }
+  .temoin__photo { height: 100%; aspect-ratio: auto; }
+  .temoin__texte { padding: 32px 34px; align-self: center; }
+}
+
 /* --- Réalisations : « Focus Cards » + tracé des schémas -------------------
    La carte survolée s'avance, les autres s'effacent. Et chaque schéma se
    dessine à l'apparition, trait après trait : le même geste que les lignes

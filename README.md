@@ -46,13 +46,44 @@ Sur Cloudflare Pages, `plombier-montauban.html` est servi à l'URL
 
 ## Déploiement
 
+Deux chaînes possibles vers Cloudflare Pages. **Une seule à la fois** : mises
+en place ensemble, elles déploient le même projet et se marchent dessus.
+
+### A. Connexion Git depuis le tableau de bord — le plus court
+
 1. Cloudflare Dashboard → **Workers & Pages** → **Create** → **Pages** →
    **Connect to Git**, puis sélectionner ce dépôt.
-2. Build command : **laisser vide**. Build output directory : **`/`**.
+2. Production branch : la branche à publier. Build command : **laisser vide**.
+   Build output directory : **`/`**.
 3. Déployer, puis rattacher le domaine `recb82.com` et `www.recb82.com` dans
    **Custom domains**.
 
-Le HTTPS et le HTTP/2 sont fournis par Cloudflare, il n'y a rien à configurer.
+Si ce dépôt n'apparaît pas dans la liste, c'est que l'application GitHub de
+Cloudflare n'y a pas accès : **Add account / Configure repositories** sur
+l'écran de connexion règle le point.
+
+### B. GitHub Actions — utile pour garder la chaîne dans le dépôt
+
+`.github/workflows/deploiement-cloudflare.yml` envoie les fichiers à chaque
+push, avec `wrangler pages deploy`. Il faut, une fois :
+
+1. Un projet Pages qui reçoit les dépôts : **Workers & Pages** → **Create** →
+   **Pages** → **Upload assets**, un nom, n'importe quel fichier pour
+   l'initialiser. Ne pas reprendre le nom du projet qui sert déjà
+   `recb82.pages.dev`, sauf à vouloir remplacer le site actuel.
+2. Deux secrets de dépôt, dans **Settings → Secrets and variables → Actions** :
+   `CLOUDFLARE_ACCOUNT_ID` et `CLOUDFLARE_API_TOKEN` (Cloudflare → *My Profile*
+   → *API Tokens* → *Create Token* → modèle **Edit Cloudflare Workers**).
+3. Si le projet ne s'appelle pas `recb82-nouveau-site` : une variable de dépôt
+   `CLOUDFLARE_PAGES_PROJECT` avec son nom (onglet *Variables* du même écran).
+
+Le workflow exclut `tools/`, `archive/`, `.github/` et le README du paquet
+envoyé, et échoue si `functions/api/devis.js` manque à l'appel.
+
+Dans les deux cas, le HTTPS, le HTTP/2 et le cache sont fournis par
+Cloudflare : il n'y a rien à configurer. Chaque branche autre que la branche
+de production reçoit sa propre URL de préversion, pratique pour faire relire
+avant de publier.
 
 ### Aperçu sur GitHub Pages
 
@@ -109,6 +140,18 @@ premiers sont des **obligations légales**.
       logo, photos de métier et chantiers avant/après récupérés depuis
       `recb82.pages.dev` (site Cloudflare du client) et placés dans
       `assets/img/`. Aucune image de banque, uniquement des chantiers RECB82.
+- [x] **Avis clients.** ~~Six cartes marquées « Exemple ».~~ Réglé : elles sont
+      retirées. Ne reste que l'avis de Laurie Boissières, recopié mot pour mot
+      depuis la fiche Google avec son nom, plus un lien vers la fiche. Pour en
+      ajouter d'autres, éditer la liste `AVIS` du générateur — **un avis qui
+      n'est pas vérifiable ne doit pas y entrer** : afficher un témoignage
+      inventé sur le site d'une entreprise réelle est une pratique commerciale
+      trompeuse (art. L121-2 du code de la consommation).
+- [ ] **Note Google.** Non affichée : elle n'a pas pu être lue
+      automatiquement, Google bloquant l'accès à la fiche. À relever à la main
+      sur la fiche puis à afficher **sans balisage `aggregateRating`** — marquer
+      soi-même une note collectée sur une plateforme tierce est contraire aux
+      règles des résultats enrichis de Google.
 - [ ] **Coordonnées GPS.** Le JSON-LD utilise `44.0181 / 1.3550`, position
       approchée du centre de Montauban. À remplacer par la position exacte
       relevée sur la fiche Google Business Profile.
