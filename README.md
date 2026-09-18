@@ -143,12 +143,22 @@ premiers sont des **obligations légales**.
       Aucune image de banque, uniquement des chantiers RECB82 — un montage
       avant/après de banque fourni par erreur a été écarté pour cette raison.
 - [x] **Avis clients.** ~~Six cartes marquées « Exemple ».~~ Réglé : elles sont
-      retirées. Ne reste que l'avis de Laurie Boissières, recopié mot pour mot
-      depuis la fiche Google avec son nom, plus un lien vers la fiche. Pour en
-      ajouter d'autres, éditer la liste `AVIS` du générateur — **un avis qui
-      n'est pas vérifiable ne doit pas y entrer** : afficher un témoignage
-      inventé sur le site d'une entreprise réelle est une pratique commerciale
-      trompeuse (art. L121-2 du code de la consommation).
+      retirées. Quatre avis Google réels les remplacent — Laurie Boissières,
+      M B, Kévin Aubert, Damien David — recopiés **mot pour mot, fautes et
+      ponctuation comprises**, avec le nom de leur auteur. C'est ce que la page
+      annonce, et c'est ce qui distingue un vrai avis d'un texte de commande :
+      ne pas « corriger » sans raison. Pour en ajouter, éditer la liste `AVIS`
+      du générateur — **un avis qui n'est pas vérifiable ne doit pas y
+      entrer** : afficher un témoignage inventé sur le site d'une entreprise
+      réelle est une pratique commerciale trompeuse (art. L121-2 du code de la
+      consommation).
+- [ ] **Deux avis à compléter.** Ceux de **Lisa NOEL** (pose de stratifié sur
+      50 m²) et **Kyllian Goovaerts** arrivent tronqués dans les captures
+      fournies. Ils sont laissés de côté plutôt que devinés — récupérer la fin
+      du texte sur la fiche Google et les ajouter à `AVIS`.
+- [ ] **Dates des avis.** Non affichées : Google ne donne qu'un délai relatif
+      (« il y a 5 mois ») qui vieillit tout seul sur une page statique. À
+      ajouter sous forme de mois absolu si les dates sont relevées à la main.
 - [ ] **Note Google.** Non affichée : elle n'a pas pu être lue
       automatiquement, Google bloquant l'accès à la fiche. À relever à la main
       sur la fiche puis à afficher **sans balisage `aggregateRating`** — marquer
