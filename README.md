@@ -139,7 +139,9 @@ premiers sont des **obligations légales**.
 - [x] **Photos de chantiers.** ~~Le site n'utilise aucune photo.~~ Réglé :
       logo, photos de métier et chantiers avant/après récupérés depuis
       `recb82.pages.dev` (site Cloudflare du client) et placés dans
-      `assets/img/`. Aucune image de banque, uniquement des chantiers RECB82.
+      `assets/img/`, complétés par les photos envoyées ensuite par le client.
+      Aucune image de banque, uniquement des chantiers RECB82 — un montage
+      avant/après de banque fourni par erreur a été écarté pour cette raison.
 - [x] **Avis clients.** ~~Six cartes marquées « Exemple ».~~ Réglé : elles sont
       retirées. Ne reste que l'avis de Laurie Boissières, recopié mot pour mot
       depuis la fiche Google avec son nom, plus un lien vers la fiche. Pour en

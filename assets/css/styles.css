@@ -1147,6 +1147,19 @@ body.is-locked { overflow: hidden; }
 .temoin__quote::before { content: '« '; color: var(--blue); font-weight: var(--fw-extra); }
 .temoin__quote::after  { content: ' »'; color: var(--blue); font-weight: var(--fw-extra); }
 .temoin__lien { margin-top: var(--s-3); text-align: center; }
+/* Les avis suivants, en colonnes CSS : chaque carte fait la hauteur de son
+   texte. Une grille alignerait tout sur le plus long avis et creuserait des
+   trous sous les plus courts. */
+.avis-grille {
+  columns: 1; column-gap: 20px;
+  margin-top: var(--s-3);
+}
+.avis-grille .avis__card {
+  break-inside: avoid;
+  margin: 0 0 20px;
+}
+@media (min-width: 640px) { .avis-grille { columns: 2; } }
+@media (min-width: 1040px) { .avis-grille { columns: 3; } }
 @media (min-width: 860px) {
   .temoin { grid-template-columns: 420px 1fr; align-items: stretch; }
   .temoin__photo { height: 100%; aspect-ratio: auto; }
