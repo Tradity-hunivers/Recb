@@ -204,6 +204,44 @@
   }
 
   /* --------------------------------------------------- 5. menu mobile */
+  function setupMega() {
+    // Le panneau s'ouvre deja au survol et a la tabulation par le CSS seul.
+    // Ce qui suit n'ajoute que le clic — utile au doigt sur tablette — et la
+    // fermeture au clic exterieur ou a la touche Echap.
+    $$('.nav__item--mega').forEach(function (item) {
+      var bouton = $('.nav__link--mega', item);
+      var panneau = $('.mega', item);
+      if (!bouton || !panneau) return;
+
+      function ouvrir(oui) {
+        bouton.setAttribute('aria-expanded', String(oui));
+        panneau.classList.toggle('is-open', oui);
+      }
+
+      bouton.addEventListener('click', function (e) {
+        e.stopPropagation();
+        ouvrir(bouton.getAttribute('aria-expanded') !== 'true');
+      });
+      // Un lien suivi referme le panneau, sinon il reste ouvert par-dessus la
+      // page d'arrivee quand la navigation se fait par ancre.
+      panneau.addEventListener('click', function (e) {
+        if (e.target.closest('a')) ouvrir(false);
+      });
+      document.addEventListener('click', function (e) {
+        if (!item.contains(e.target)) ouvrir(false);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (bouton.getAttribute('aria-expanded') !== 'true') return;
+        ouvrir(false);
+        bouton.focus();
+      });
+      // La souris qui quitte la zone rend la main au survol : sans cela, un
+      // panneau ouvert au clic resterait colle a l'ecran.
+      item.addEventListener('mouseleave', function () { ouvrir(false); });
+    });
+  }
+
   function setupDrawer() {
     var burger = $('.burger');
     var drawer = $('#menu');
@@ -587,6 +625,7 @@
     setupScrollFX();
     setupHeader();
     setupDrawer();
+    setupMega();
     setupTilt();
     setupSpotlight();
     setupMagnetic();

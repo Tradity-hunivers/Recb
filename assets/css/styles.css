@@ -1110,6 +1110,133 @@ body.is-locked { overflow: hidden; }
   .avis__col:nth-child(3) { display: block; }
 }
 
+/* --- Méga-menu des prestations -------------------------------------------
+   Ouvert au survol ET à la tabulation par le seul CSS : sans JavaScript, il
+   reste utilisable au doigt comme au clavier. Le clic n'ajoute que le confort
+   d'un panneau qui reste ouvert quand la souris s'en va. */
+/* Le panneau se cale sur la barre entiere, pas sur le lien : centre sur un
+   lien place a gauche, il sortait de l'ecran. */
+.header__inner { position: relative; }
+.nav__item { position: static; }
+.nav__link--mega {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: inherit; color: inherit; cursor: pointer;
+}
+.nav__chevron { transition: transform .3s var(--ease-out); }
+
+.mega {
+  position: absolute; top: calc(100% + 14px); left: 50%;
+  width: min(940px, calc(100vw - 2 * var(--gutter)));
+  transform: translate(-50%, -10px);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .22s var(--ease), transform .3s var(--ease-out),
+              visibility 0s linear .3s;
+  z-index: 60;
+}
+/* Pont invisible entre le lien et le panneau : sans lui, la souris traverse
+   un vide de 14 px et le survol se coupe en chemin. */
+.mega::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -18px; height: 18px;
+}
+.mega__inner {
+  display: grid; gap: 8px 28px;
+  grid-template-columns: 1fr 1fr minmax(240px, .85fr);
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  box-shadow: 0 28px 60px rgba(11, 53, 88, .16), 0 2px 8px rgba(11, 53, 88, .06);
+}
+.nav__item--mega:focus-within .mega,
+.nav__item--mega .mega.is-open {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translate(-50%, 0);
+  transition-delay: 0s;
+}
+.nav__item--mega:focus-within .nav__chevron,
+.nav__link--mega[aria-expanded="true"] .nav__chevron { transform: rotate(180deg); }
+@media (hover: hover) and (pointer: fine) {
+  .nav__item--mega:hover .mega {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transform: translate(-50%, 0);
+    transition-delay: 0s;
+  }
+  .nav__item--mega:hover .nav__chevron { transform: rotate(180deg); }
+}
+
+.mega__titre {
+  font-size: 11px; font-weight: var(--fw-extra);
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--slate); margin: 4px 0 10px 12px;
+}
+.mega__liste { list-style: none; margin: 0; padding: 0; }
+.mega__link {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 12px; border-radius: 10px;
+  color: var(--ink); text-decoration: none;
+  transition: background-color .22s var(--ease), transform .28s var(--ease-out);
+}
+.mega__link:hover { background: var(--pebble); transform: translateX(3px); }
+.mega__link[aria-current="page"] { background: var(--pebble); }
+.mega__icon {
+  flex: none; width: 34px; height: 34px; border-radius: 9px;
+  display: grid; place-items: center;
+  background: var(--sky); color: var(--blue);
+  transition: background-color .22s var(--ease), color .22s var(--ease);
+}
+.mega__icon svg { width: 19px; height: 19px; }
+.mega__link:hover .mega__icon { background: var(--blue); color: #fff; }
+.mega__texte { display: block; }
+.mega__nom { display: block; font-size: 15px; font-weight: var(--fw-bold); line-height: 1.35; }
+.mega__phrase { display: block; font-size: 13px; line-height: 1.45; color: var(--slate); margin-top: 2px; }
+
+.mega__col--encart {
+  background: var(--pebble); border-radius: 12px; padding: 20px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.mega__col--encart .mega__titre { margin: 0; }
+.mega__encart-texte { font-size: 13px; line-height: 1.5; color: var(--slate); margin: 0; }
+.mega__tel {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: var(--fw-extra); color: var(--ink); text-decoration: none;
+}
+.mega__tel svg { width: 17px; height: 17px; color: var(--blue); }
+.mega__horaires { font-size: 12px; color: var(--slate); margin: 0; }
+
+/* Les liens entrent l'un après l'autre : le même décalage que les grilles du
+   site, pour que le menu appartienne au même ensemble. */
+.nav__item--mega:hover .mega__link,
+.nav__item--mega:focus-within .mega__link,
+.mega.is-open .mega__link {
+  animation: mega-entree .34s var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 28ms + 40ms);
+}
+@keyframes mega-entree {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* --- Tiroir mobile : mêmes entrées, mises à plat ------------------------- */
+.drawer__titre {
+  font-size: 11px; font-weight: var(--fw-extra);
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--slate); margin: 22px 0 6px;
+}
+.drawer__titre:first-child { margin-top: 4px; }
+.drawer__icon {
+  flex: none; width: 36px; height: 36px; border-radius: 9px;
+  display: grid; place-items: center;
+  background: var(--sky); color: var(--blue);
+}
+.drawer__icon svg { width: 20px; height: 20px; }
+.drawer__texte { flex: 1; min-width: 0; }
+.drawer__nom { display: block; font-size: 16px; font-weight: var(--fw-bold); line-height: 1.3; }
+.drawer__phrase { display: block; font-size: 13px; line-height: 1.4; color: var(--slate); margin-top: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mega, .mega__link, .nav__chevron { transition-duration: .01ms !important; animation: none !important; }
+}
+
 /* --- Avis : un témoignage vérifié, photo à l'appui ------------------------
    Les colonnes défilantes supposaient six avis. Il y en a un de vérifiable :
    une seule pièce, mise en avant, vaut mieux que six inventées. */
@@ -1257,9 +1384,16 @@ body.is-locked { overflow: hidden; }
   background: rgba(255,255,255,.96); color: var(--ink);
   display: grid; place-items: center;
   box-shadow: 0 10px 30px rgba(0,0,0,.3);
+  /* Le trait reste transparent aux événements — pleine hauteur, il bloquerait
+     le texte dessous — mais le bouton rond, lui, se saisit. `touch-action:
+     none` garantit qu'un doigt posé dessus glisse au lieu de faire défiler. */
+  pointer-events: auto; touch-action: none; cursor: ew-resize;
+  transition: transform .25s var(--spring), box-shadow .3s var(--ease);
 }
+.hero__ba:hover .hero__knob { transform: translate(-50%, -50%) scale(1.06); }
+.hero__knob:active { transform: translate(-50%, -50%) scale(.94); }
 .hero__tag {
-  position: absolute; z-index: 3; bottom: 14px;
+  position: absolute; z-index: 3; bottom: 14px; pointer-events: none;
   padding: 6px 14px; border-radius: var(--r-pill);
   font-size: var(--t-caption); font-weight: var(--fw-extra);
   letter-spacing: .1em; text-transform: uppercase;
@@ -1273,7 +1407,7 @@ body.is-locked { overflow: hidden; }
 .hero__scrim {
   /* Sans objet tant que la photo est en bande : il ne sert qu'en plein cadre. */
   display: none;
-  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
     linear-gradient(180deg, rgba(6,31,55,.62) 0%, rgba(6,31,55,.25) 28%, rgba(6,31,55,.78) 62%, rgba(6,31,55,.96) 100%);
 }
@@ -1288,7 +1422,14 @@ body.is-locked { overflow: hidden; }
 .hero--photo .lead { color: #d8e6f5; max-width: 52ch; margin-bottom: var(--s-3); }
 .hero--photo .eyebrow { background: rgba(255,255,255,.14); color: #fff; backdrop-filter: blur(6px); }
 .hero--photo .eyebrow::before { background: #6cb4ff; }
-.hero__content { position: relative; z-index: 1; width: 100%; }
+.hero__content {
+  position: relative; z-index: 2; width: 100%;
+  /* Le bloc s'étend sur toute la largeur et recouvrait la photo : plus aucun
+     glissé n'était possible sur grand écran. Il laisse désormais passer les
+     événements, sa colonne de texte les reprenant pour elle seule. */
+  pointer-events: none;
+}
+.hero__content > div { pointer-events: auto; }
 .hero--photo .hero__proof { border-top-color: rgba(255,255,255,.22); }
 .hero--photo .hero__proof-item b { color: var(--paper); }
 .hero--photo .hero__proof-item span { color: #a9c4dd; }
@@ -1305,7 +1446,11 @@ body.is-locked { overflow: hidden; }
     min-height: min(90svh, 800px);
     padding-top: calc(var(--header-h) + 24px);
   }
-  .hero__ba { position: absolute; inset: 0; z-index: -2; aspect-ratio: auto; }
+  /* `z-index: auto` : la photo ne fabrique plus de contexte d'empilement, si
+     bien que sa poignée peut passer au-dessus du texte au lieu d'y rester
+     prisonnière. Les deux images, en z-index automatique, restent dessous. */
+  .hero__ba { position: absolute; inset: 0; z-index: auto; aspect-ratio: auto; }
+  .hero__handle { z-index: 4; }
   .hero__scrim {
     display: block;
     background:
