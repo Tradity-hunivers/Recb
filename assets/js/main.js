@@ -337,6 +337,14 @@
     $$('.ba, .hero__ba').forEach(function (el) {
       var range = $('.ba__range', el);
       var startX = 0, startY = 0, mode = null; // null · 'attente' · 'glisse' · 'defile'
+      var posDepart = 50, surPoignee = false;
+
+      // Position courante du trait, quelle qu'en soit l'origine : valeur de
+      // base, animation de révélation ou style en ligne posé par le glissé.
+      function posActuelle() {
+        var v = parseFloat(getComputedStyle(el).getPropertyValue('--pos'));
+        return isNaN(v) ? 50 : v;
+      }
 
       function apply(pct) {
         pct = Math.max(2, Math.min(98, pct));
@@ -347,7 +355,14 @@
         var r = el.getBoundingClientRect();
         apply(((x - r.left) / r.width) * 100);
       }
-      var move = rafThrottle(fromX);
+      // Suivi relatif : le trait se déplace d'autant que la main, sans se
+      // recaler sur la position absolue du doigt. C'est ce qui donne
+      // l'impression de tenir la poignée plutôt que de la voir sauter.
+      function depuisDepart(x) {
+        var r = el.getBoundingClientRect();
+        apply(posDepart + ((x - startX) / r.width) * 100);
+      }
+      var move = rafThrottle(depuisDepart);
 
       if (range) {
         range.addEventListener('input', function () { apply(parseFloat(range.value)); });
@@ -359,14 +374,27 @@
 
       el.addEventListener('pointerdown', function (e) {
         // La révélation jouée au chargement s'efface dès que le visiteur prend
-        // la main, sinon elle écraserait sa position au prochain repaint.
-        if (el.classList.contains('hero__ba')) el.style.animation = 'none';
+        // la main, sinon elle écraserait sa position au prochain repaint. Mais
+        // il faut d'abord figer la position qu'elle a atteinte : sans cela
+        // --pos retombe à sa valeur de base et le trait saute sous le doigt.
+        if (el.style.animation !== 'none') {
+          el.style.setProperty('--pos', posActuelle().toFixed(2) + '%');
+          el.style.animation = 'none';
+        }
         startX = e.clientX;
         startY = e.clientY;
+        posDepart = posActuelle();
+
+        // Attrape-t-on la poignée, ou touche-t-on la photo à côté ?
+        var r = el.getBoundingClientRect();
+        surPoignee = Math.abs(e.clientX - (r.left + (r.width * posDepart) / 100)) <= 44;
+
         if (e.pointerType === 'mouse') {
           mode = 'glisse';
           capture(e);
-          fromX(e.clientX);
+          // À la souris, cliquer ailleurs place le trait : le pointeur est
+          // précis, l'intention ne fait pas de doute.
+          if (!surPoignee) { fromX(e.clientX); posDepart = posActuelle(); }
         } else {
           mode = 'attente';
         }
@@ -376,10 +404,15 @@
         if (mode === 'attente') {
           var dx = Math.abs(e.clientX - startX);
           var dy = Math.abs(e.clientY - startY);
+          // Six pixels de marge avant de trancher : en dessous, on ne sait pas
+          // encore si le visiteur fait défiler la page ou déplace le trait.
           if (dx < 6 && dy < 6) return;
           if (dx <= dy) { mode = 'defile'; return; }
           mode = 'glisse';
           capture(e);
+          // Doigt posé loin de la poignée : le trait vient s'y placer une
+          // fois, puis suit. Posé dessus : il suit sans jamais sauter.
+          if (!surPoignee) { fromX(e.clientX); posDepart = posActuelle(); startX = e.clientX; }
         }
         if (mode === 'glisse') { move(e.clientX); return; }
         if (mode === null && fine.matches && e.pointerType === 'mouse') move(e.clientX);
