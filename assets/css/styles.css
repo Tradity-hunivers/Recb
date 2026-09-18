@@ -1110,6 +1110,172 @@ body.is-locked { overflow: hidden; }
   .avis__col:nth-child(3) { display: block; }
 }
 
+/* --- Consentement aux traceurs -------------------------------------------
+   Carte bleu encre posée en bas, aux couleurs de la marque. Elle ne bloque
+   pas la page : la CNIL n'impose pas de mur, et un bandeau qui séquestre le
+   visiteur fait fuir plus qu'il ne rassure. Accepter et refuser sont deux
+   boutons de même taille, côte à côte — refuser doit être aussi simple. */
+.consent {
+  position: fixed; z-index: 90;
+  left: var(--gutter); right: var(--gutter);
+  /* La barre d'appel occupe déjà le bas sur téléphone : on se pose au-dessus
+     d'elle, encoche comprise. Elle disparaît au-delà de 860 px. */
+  bottom: calc(68px + env(safe-area-inset-bottom) + 12px);
+}
+.consent[hidden] { display: none; }
+.consent__inner {
+  margin: 0 auto; max-width: 880px;
+  display: grid; gap: 13px;
+  padding: 15px 17px;
+  background: var(--ink); color: var(--paper);
+  border-radius: var(--r-card);
+  box-shadow: 0 24px 60px rgba(6, 31, 55, .34), 0 2px 10px rgba(6, 31, 55, .2);
+  /* Filet bleu en haut : la même signature que les cartes du site. */
+  border-top: 3px solid var(--blue);
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .34s var(--ease), transform .46s var(--ease-out);
+}
+.consent.is-in .consent__inner { opacity: 1; transform: none; }
+
+.consent__titre {
+  display: flex; align-items: center; gap: 9px;
+  margin: 0 0 6px;
+  font-size: 15px; font-weight: var(--fw-extra);
+  /* La regle globale sur <p> l'emporte sur la couleur heritee : sans cette
+     ligne le titre sortait en gris ardoise sur fond bleu encre. */
+  color: var(--paper);
+}
+.consent__titre svg { width: 19px; height: 19px; color: #6cb4ff; flex: none; }
+.consent__phrase { margin: 0; font-size: 13px; line-height: 1.5; color: #c8dcf0; }
+.consent__lien { color: #8cc6ff; font-weight: var(--fw-bold); text-decoration: underline; text-underline-offset: 2px; }
+.consent__lien:hover { color: #fff; }
+
+/* Les deux boutons cote a cote des le telephone : empiles, le bandeau
+   occupait 400 px sur un ecran de 844 et masquait la moitie de la page. */
+.consent__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.consent__actions .btn { width: 100%; justify-content: center; padding-inline: 12px; }
+.consent__regler { grid-column: 1 / -1; }
+.consent__regler {
+  font-size: 12.5px; font-weight: var(--fw-bold);
+  color: #a9c4dd; text-decoration: underline; text-underline-offset: 3px;
+  padding: 3px; border-radius: 8px;
+}
+.consent__regler:hover { color: #fff; }
+
+@media (min-width: 860px) {
+  .consent { bottom: 20px; }
+}
+@media (min-width: 720px) {
+  .consent__inner {
+    grid-template-columns: 1fr auto;
+    align-items: center; gap: 26px;
+    padding: 20px 24px;
+  }
+  .consent__actions {
+    grid-template-columns: auto auto;
+    align-items: center; gap: 10px 12px;
+  }
+  .consent__actions .btn { width: auto; white-space: nowrap; }
+  .consent__regler { grid-column: 1 / -1; justify-self: center; }
+}
+
+/* --- Panneau de réglages : boîte de dialogue native ---------------------- */
+.consent-modal {
+  width: min(620px, calc(100vw - 2 * var(--gutter)));
+  max-height: min(84vh, 720px);
+  padding: 0; border: 0;
+  /* Le reset global pose `* { margin: 0 }`, ce qui écrase la marge
+     automatique par laquelle un <dialog> se centre tout seul. */
+  margin: auto;
+  border-radius: var(--r-card);
+  background: var(--paper); color: var(--ink);
+  box-shadow: 0 40px 90px rgba(11, 53, 88, .3);
+}
+.consent-modal::backdrop { background: rgba(6, 31, 55, .6); backdrop-filter: blur(3px); }
+.consent-modal[open] { animation: consent-modal-entree .32s var(--ease-out); }
+@keyframes consent-modal-entree {
+  from { opacity: 0; transform: translateY(14px) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+.consent-modal form { padding: 26px 24px 20px; }
+.consent-modal__titre { font-size: var(--t-h3); margin: 0 0 8px; }
+.consent-modal__intro { font-size: 14px; line-height: 1.55; color: var(--slate); margin: 0 0 20px; }
+
+.consent-cat {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
+  padding: 16px 0;
+  border-top: 1px solid var(--hairline);
+}
+.consent-cat__nom { margin: 0 0 4px; font-size: 15px; font-weight: var(--fw-bold); }
+.consent-cat__desc { margin: 0; font-size: 13px; line-height: 1.5; color: var(--slate); }
+.consent-cat__desc code {
+  font-size: 12px; background: var(--pebble);
+  padding: 1px 5px; border-radius: 4px;
+}
+.consent-cat__fige {
+  flex: none; font-size: 12px; font-weight: var(--fw-extra);
+  color: var(--slate); background: var(--pebble);
+  padding: 6px 11px; border-radius: var(--r-pill);
+}
+
+/* Interrupteur : une case à cocher native, habillée. Le clavier et les
+   technologies d'assistance continuent de voir une case à cocher. */
+.switch { flex: none; position: relative; display: inline-flex; cursor: pointer; }
+.switch input {
+  position: absolute; inset: 0; opacity: 0; margin: 0;
+  width: 100%; height: 100%; cursor: pointer;
+}
+.switch__piste {
+  width: 46px; height: 27px; border-radius: 99px;
+  background: #cfdcea;
+  transition: background-color .28s var(--ease);
+  display: block; position: relative;
+}
+.switch__piste::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 21px; height: 21px; border-radius: 50%;
+  background: #fff; box-shadow: 0 2px 5px rgba(11, 53, 88, .28);
+  transition: transform .28s var(--spring);
+}
+.switch input:checked + .switch__piste { background: var(--blue); }
+.switch input:checked + .switch__piste::after { transform: translateX(19px); }
+.switch input:focus-visible + .switch__piste { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+/* Deux rangs assumes plutot qu'un repli hasardeux : les deux choix en bloc
+   se font face, l'enregistrement occupe toute la largeur en dessous. */
+.consent-modal__pied {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  padding-top: 18px; margin-top: 4px;
+  border-top: 1px solid var(--hairline);
+}
+.consent-modal__pied .btn { justify-content: center; }
+.consent-modal__pied .btn--primary { grid-column: 1 / -1; }
+
+/* --- Tableau des cookies, page /cookies ---------------------------------- */
+.table-cookies {
+  width: 100%; border-collapse: collapse;
+  margin: 18px 0; font-size: 14px;
+  display: block; overflow-x: auto;
+}
+.table-cookies th, .table-cookies td {
+  text-align: left; padding: 11px 14px;
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+.table-cookies th {
+  font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--slate); background: var(--pebble);
+}
+.table-cookies td code { font-size: 13px; background: var(--pebble); padding: 2px 6px; border-radius: 4px; }
+.note { font-size: 14px; color: var(--slate); }
+
+@media (prefers-reduced-motion: reduce) {
+  .consent__inner, .consent-modal[open], .switch__piste::after {
+    animation: none !important; transition-duration: .01ms !important;
+  }
+  .consent__inner { opacity: 1; transform: none; }
+}
+
 /* --- Méga-menu des prestations -------------------------------------------
    Ouvert au survol ET à la tabulation par le seul CSS : sans JavaScript, il
    reste utilisable au doigt comme au clavier. Le clic n'ajoute que le confort

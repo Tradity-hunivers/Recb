@@ -443,6 +443,52 @@ p{color:var(--slate)}
     </div>
   </section>
 </main>
+<div class="consent" id="consent" role="region" aria-labelledby="consent-titre" hidden>
+  <div class="consent__inner">
+    <div class="consent__texte">
+      <p class="consent__titre" id="consent-titre"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.1 8.6 7.5 10 4.4-1.4 7.5-5.4 7.5-10v-6L12 2.5Z"/><path d="m9 12 2 2 4-4"/></svg> Cookies et mesure d'audience</p>
+      <p class="consent__phrase">Aucune publicité, aucun réseau social, aucune ressource tierce. Si une mesure d'audience est ajoutée, votre choix sera respecté&nbsp;— il est conservé six mois. <a class="consent__lien" href="/cookies">En savoir plus</a></p>
+    </div>
+    <div class="consent__actions">
+      <button class="btn btn--primary" type="button" data-consent-accepter>Tout accepter</button>
+      <button class="btn btn--ghost" type="button" data-consent-refuser>Tout refuser</button>
+      <button class="consent__regler" type="button" data-consent-reglages>Personnaliser</button>
+    </div>
+  </div>
+</div>
+
+<dialog class="consent-modal" id="consent-reglages" aria-labelledby="consent-modal-titre">
+  <form method="dialog">
+    <h2 class="consent-modal__titre" id="consent-modal-titre">Vos préférences</h2>
+    <p class="consent-modal__intro">Un seul cookie est déposé aujourd'hui&nbsp;: celui qui retient votre réponse. Les autres catégories sont préréglées pour le jour où elles serviront.</p>
+
+    <div class="consent-cat">
+      <div>
+        <p class="consent-cat__nom">Strictement nécessaires</p>
+        <p class="consent-cat__desc">Le cookie <code>recb_consent</code>, qui mémorise votre choix pour ne plus vous le redemander. Sans lui, la question reviendrait à chaque page.</p>
+      </div>
+      <span class="consent-cat__fige">Toujours actif</span>
+    </div>
+
+    <div class="consent-cat">
+      <div>
+        <p class="consent-cat__nom">Mesure d'audience</p>
+        <p class="consent-cat__desc">Compter les visites et les pages consultées, pour savoir ce qui intéresse. <strong>Aucun outil de ce type n'est installé à ce jour</strong>&nbsp;: votre réponse sera appliquée s'il en est ajouté un.</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" name="mesure">
+        <span class="switch__piste" aria-hidden="true"></span>
+        <span class="visually-hidden">Autoriser la mesure d'audience</span>
+      </label>
+    </div>
+
+    <div class="consent-modal__pied">
+      <button class="btn btn--ghost" type="submit" value="refuser">Tout refuser</button>
+      <button class="btn btn--ghost" type="submit" value="accepter">Tout accepter</button>
+      <button class="btn btn--primary" type="submit" value="enregistrer">Enregistrer mes choix</button>
+    </div>
+  </form>
+</dialog>
 <footer class="footer">
   <div class="wrap">
     <div class="footer__grid">
@@ -488,6 +534,8 @@ p{color:var(--slate)}
           <li><a href="/devis">Demander un devis</a></li>
           <li><a href="/mentions-legales">Mentions légales</a></li>
           <li><a href="/politique-confidentialite">Confidentialité</a></li>
+          <li><a href="/cookies">Cookies</a></li>
+          <li><a href="#" data-consent-rouvrir>Modifier mes choix</a></li>
           <li><a href="https://www.facebook.com/Recb82-275847596385836" rel="noopener me" target="_blank">Facebook</a></li>
         </ul>
       </div>
@@ -500,5 +548,6 @@ p{color:var(--slate)}
 </footer>
 
 <script src="/assets/js/main.js" defer></script>
+<script src="/assets/js/consentement.js" defer></script>
 </body>
 </html>

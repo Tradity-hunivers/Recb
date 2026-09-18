@@ -22,12 +22,14 @@ devis.html                                Formulaire de demande de devis
 merci.html                                Confirmation d'envoi (noindex)
 mentions-legales.html
 politique-confidentialite.html
+cookies.html                              Politique de cookies et liste exhaustive
 
 peintre-montauban.html                    Page métier-ville
 renovation-appartement-montauban.html     Page métier-ville
 
 assets/css/styles.css                     Feuille unique
 assets/js/main.js                         Animations et interactions
+assets/js/consentement.js                 Bandeau de consentement et barrière aux traceurs
 assets/fonts/manrope-*.woff2              Police auto-hébergée (variable 400→800)
 assets/img/                               Logo et photos de chantier de RECB82
 
@@ -123,6 +125,42 @@ arrive et que la redirection vers `/merci` se fait bien.
 
 Pour changer de prestataire (Formspree, Brevo, une autre API), il n'y a qu'un
 seul appel `fetch` à remplacer dans `functions/api/devis.js`.
+
+---
+
+## Consentement aux traceurs
+
+Le site ne dépose **aucun traceur** : ni mesure d'audience, ni publicité, ni
+bouton de réseau social, et aucune ressource n'est chargée depuis un serveur
+tiers. Le seul cookie écrit est `recb_consent`, qui retient la réponse du
+visiteur pendant six mois — cookie strictement nécessaire, exempté de
+consentement.
+
+`assets/js/consentement.js` n'est donc pas un bandeau décoratif : c'est une
+**barrière réellement fonctionnelle**, prête pour le jour où une mesure
+d'audience sera ajoutée. Un script de suivi s'écrit ainsi, et ne s'exécute
+qu'après un accord explicite :
+
+```html
+<script type="text/plain" data-consent="mesure" src="https://…"></script>
+```
+
+Le script remplace `type="text/plain"` par un type exécutable dès que la
+catégorie est acceptée, et émet l'événement `recb:consentement` pour les codes
+qui préfèrent réagir eux-mêmes. **Ne jamais ajouter un traceur sans cet
+attribut** : il se déposerait alors sans consentement, alors que la page
+`/cookies` affirme l'inverse.
+
+Les règles suivies — lignes directrices de la CNIL et article 82 de la loi
+Informatique et Libertés — imposent que refuser soit aussi simple qu'accepter
+(deux boutons de même taille, côte à côte), que le refus empêche le dépôt et
+non seulement l'affichage, et que le choix puisse être retiré à tout moment
+(lien « Modifier mes choix » du pied de page, et bouton sur `/cookies`).
+
+Pour ajouter une catégorie : compléter `CATEGORIES` dans
+`assets/js/consentement.js`, ajouter l'interrupteur correspondant dans
+`consentement()` (`common.py`) et **inscrire le cookie dans le tableau de la
+page `/cookies`** — cette liste se veut exhaustive.
 
 ---
 
