@@ -385,7 +385,10 @@
       }
 
       function apply(pct) {
-        pct = Math.max(2, Math.min(98, pct));
+        // Une bande de chaque photo reste toujours visible : pousse a fond,
+        // le comparateur ne montrait plus qu'une seule image et le hero
+        // paraissait avoir perdu sa photo.
+        pct = Math.max(8, Math.min(92, pct));
         el.style.setProperty('--pos', pct.toFixed(2) + '%');
         if (range) range.value = Math.round(pct);
       }
@@ -453,7 +456,10 @@
           if (!surPoignee) { fromX(e.clientX); posDepart = posActuelle(); startX = e.clientX; }
         }
         if (mode === 'glisse') { move(e.clientX); return; }
-        if (mode === null && fine.matches && e.pointerType === 'mouse') move(e.clientX);
+        // Rien d'autre : le trait ne bouge que pendant un glissé. Une ancienne
+        // branche le faisait suivre la souris sans bouton enfoncé, et comme le
+        // suivi est relatif, elle repartait du dernier point de saisie — un
+        // simple passage de souris envoyait le trait d'un bord à l'autre.
       });
 
       function relacher() { mode = null; }

@@ -1553,8 +1553,16 @@ body.is-locked { overflow: hidden; }
   /* Le trait reste transparent aux événements — pleine hauteur, il bloquerait
      le texte dessous — mais le bouton rond, lui, se saisit. `touch-action:
      none` garantit qu'un doigt posé dessus glisse au lieu de faire défiler. */
-  pointer-events: auto; touch-action: none; cursor: ew-resize;
+  /* `pan-y` et non `none` : le doigt doit pouvoir faire defiler la page en
+     partant du bouton, qui tombe au milieu de la bande photo sur telephone.
+     Le defilement horizontal, lui, nous revient — c'est tout ce qu'il faut. */
+  pointer-events: auto; touch-action: pan-y; cursor: ew-resize;
   transition: transform .25s var(--spring), box-shadow .3s var(--ease);
+}
+/* Zone de saisie elargie de 14 px tout autour, invisible : viser un rond de
+   52 px a la souris comme au doigt demande sinon trop de precision. */
+.hero__knob::before {
+  content: ''; position: absolute; inset: -14px; border-radius: 50%;
 }
 .hero__ba:hover .hero__knob { transform: translate(-50%, -50%) scale(1.06); }
 .hero__knob:active { transform: translate(-50%, -50%) scale(.94); }
@@ -1595,7 +1603,11 @@ body.is-locked { overflow: hidden; }
      événements, sa colonne de texte les reprenant pour elle seule. */
   pointer-events: none;
 }
-.hero__content > div { pointer-events: auto; }
+/* Seuls le texte et les commandes reprennent les evenements, pas la boite qui
+   les contient : sinon la colonne entiere bloque le glisse de la photo sur
+   toute sa hauteur, et l'on croit le curseur casse. */
+.hero__content > div { pointer-events: none; }
+.hero--photo .hero__content :where(h1, p, a, button, span, li) { pointer-events: auto; }
 .hero--photo .hero__proof { border-top-color: rgba(255,255,255,.22); }
 .hero--photo .hero__proof-item b { color: var(--paper); }
 .hero--photo .hero__proof-item span { color: #a9c4dd; }
