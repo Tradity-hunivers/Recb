@@ -384,29 +384,43 @@
         return isNaN(v) ? 50 : v;
       }
 
+      // Géométrie relevée à la saisie, pas à chaque image : lire une position
+      // juste avant d'écrire un style force le navigateur à recalculer la mise
+      // en page à chaque fois. Elle ne bouge pas pendant un glissé.
+      var gauche = 0, largeur = 1, pos = 50;
+
+      function mesurer() {
+        var r = el.getBoundingClientRect();
+        gauche = r.left;
+        largeur = r.width || 1;
+      }
+
       function apply(pct) {
-        // Une bande de chaque photo reste toujours visible : pousse a fond,
+        // Une bande de chaque photo reste toujours visible : poussé à fond,
         // le comparateur ne montrait plus qu'une seule image et le hero
         // paraissait avoir perdu sa photo.
         pct = Math.max(8, Math.min(92, pct));
+        if (pct === pos) return;          // rien à réécrire
+        pos = pct;
         el.style.setProperty('--pos', pct.toFixed(2) + '%');
-        if (range) range.value = Math.round(pct);
       }
       function fromX(x) {
-        var r = el.getBoundingClientRect();
-        apply(((x - r.left) / r.width) * 100);
+        apply(((x - gauche) / largeur) * 100);
       }
       // Suivi relatif : le trait se déplace d'autant que la main, sans se
       // recaler sur la position absolue du doigt. C'est ce qui donne
       // l'impression de tenir la poignée plutôt que de la voir sauter.
       function depuisDepart(x) {
-        var r = el.getBoundingClientRect();
-        apply(posDepart + ((x - startX) / r.width) * 100);
+        apply(posDepart + ((x - startX) / largeur) * 100);
       }
       var move = rafThrottle(depuisDepart);
 
       if (range) {
         range.addEventListener('input', function () { apply(parseFloat(range.value)); });
+        // Une largeur fraîche à la première interaction clavier, et après un
+        // changement de format d'écran.
+        window.addEventListener('resize', rafThrottle(mesurer), { passive: true });
+        mesurer();
       }
 
       function capture(e) {
@@ -424,11 +438,15 @@
         }
         startX = e.clientX;
         startY = e.clientY;
-        posDepart = posActuelle();
+        posDepart = pos = posActuelle();
+        mesurer();
+        // Prévient le navigateur qu'une couche va bouger : il la prépare une
+        // fois au lieu de la redécouvrir à chaque image.
+        el.classList.add('is-glisse');
+        document.documentElement.classList.add('is-glisse');
 
         // Attrape-t-on la poignée, ou touche-t-on la photo à côté ?
-        var r = el.getBoundingClientRect();
-        surPoignee = Math.abs(e.clientX - (r.left + (r.width * posDepart) / 100)) <= 44;
+        surPoignee = Math.abs(e.clientX - (gauche + (largeur * posDepart) / 100)) <= 44;
 
         if (e.pointerType === 'mouse') {
           mode = 'glisse';
@@ -462,7 +480,14 @@
         // simple passage de souris envoyait le trait d'un bord à l'autre.
       });
 
-      function relacher() { mode = null; }
+      function relacher() {
+        mode = null;
+        el.classList.remove('is-glisse');
+        document.documentElement.classList.remove('is-glisse');
+        // Le curseur natif se remet a la bonne valeur ici seulement : l'ecrire
+        // a chaque image coutait un recalcul de style par deplacement.
+        if (range) range.value = Math.round(pos);
+      }
       el.addEventListener('pointerup', relacher);
       el.addEventListener('pointercancel', relacher);
       el.addEventListener('pointerleave', relacher);

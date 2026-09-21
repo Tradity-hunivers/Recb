@@ -632,9 +632,13 @@ body.is-locked { overflow: hidden; }
 }
 .ba__after > * { width: 100%; height: 100%; }
 .ba__handle {
-  position: absolute; top: 0; bottom: 0; left: var(--pos, 50%);
-  width: 3px; background: var(--paper); box-shadow: 0 0 0 1px rgba(11,53,88,.12);
+  position: absolute; top: 0; bottom: 0; left: 0; right: 0;
+  transform: translateX(var(--pos, 50%));
   pointer-events: none;
+}
+.ba__handle::before {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -1.5px;
+  width: 3px; background: var(--paper); box-shadow: 0 0 0 1px rgba(11,53,88,.12);
 }
 /* Le champ `range` ne sert qu'au clavier : `pointer-events: none` l'empêche
    d'entrer en concurrence avec le glissement géré en JavaScript, sans lui
@@ -1018,13 +1022,19 @@ body.is-locked { overflow: hidden; }
   mask-composite: exclude;
   opacity: 0;
   transition: opacity .35s var(--ease);
-  animation: faisceau 2.4s linear infinite;
+  /* Pas d'animation au repos : le faisceau est invisible tant qu'on ne
+     survole pas, et faire tourner un `conic-gradient` impose un recalcul de
+     style et une repeinture a chaque image. Il ne tourne qu'une fois allume,
+     plus bas. */
   pointer-events: none;
 }
-.btn:hover::after, .btn:focus-visible::after, .btn--live::after { opacity: 1; }
+.btn:hover::after, .btn:focus-visible::after, .btn--live::after {
+  opacity: 1;
+  animation: faisceau 2.4s linear infinite;
+}
 /* Sans survol possible, le faisceau reste allumé : c'est là qu'il sert le plus. */
 @media (hover: none) {
-  .btn::after { opacity: 1; }
+  .btn::after { opacity: 1; animation: faisceau 2.4s linear infinite; }
 }
 @keyframes faisceau { to { --ang: 360deg; } }
 .btn--primary { --beam: #ffffff; }
@@ -1074,9 +1084,13 @@ body.is-locked { overflow: hidden; }
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
   opacity: 0; transition: opacity .35s var(--ease);
-  animation: faisceau 2.4s linear infinite; pointer-events: none;
+  /* Pas d'animation au repos : le faisceau est invisible tant qu'on ne
+     survole pas, et faire tourner un `conic-gradient` impose un recalcul de
+     style et une repeinture a chaque image. Il ne tourne qu'une fois allume,
+     plus bas. */
+  pointer-events: none;
 }
-.avis__card:hover::after { opacity: 1; }
+.avis__card:hover::after { opacity: 1; animation: faisceau 2.4s linear infinite; }
 .avis__quote { font-size: 15px; line-height: 1.6; color: var(--ink); }
 .avis__quote::before { content: '« '; color: var(--blue); font-weight: var(--fw-extra); }
 .avis__quote::after  { content: ' »'; color: var(--blue); font-weight: var(--fw-extra); }
@@ -1424,10 +1438,14 @@ body.is-locked { overflow: hidden; }
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
   opacity: 0; transition: opacity .35s var(--ease);
-  animation: faisceau 2.4s linear infinite; pointer-events: none;
+  /* Pas d'animation au repos : le faisceau est invisible tant qu'on ne
+     survole pas, et faire tourner un `conic-gradient` impose un recalcul de
+     style et une repeinture a chaque image. Il ne tourne qu'une fois allume,
+     plus bas. */
+  pointer-events: none;
 }
 .temoin { position: relative; }
-.temoin:hover::after { opacity: 1; }
+.temoin:hover::after { opacity: 1; animation: faisceau 2.4s linear infinite; }
 .temoin__photo {
   width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block;
   background: var(--pebble);
@@ -1498,9 +1516,13 @@ body.is-locked { overflow: hidden; }
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
   opacity: 0; transition: opacity .35s var(--ease);
-  animation: faisceau 2.4s linear infinite; pointer-events: none;
+  /* Pas d'animation au repos : le faisceau est invisible tant qu'on ne
+     survole pas, et faire tourner un `conic-gradient` impose un recalcul de
+     style et une repeinture a chaque image. Il ne tourne qu'une fois allume,
+     plus bas. */
+  pointer-events: none;
 }
-.work:hover::after { opacity: 1; }
+.work:hover::after { opacity: 1; animation: faisceau 2.4s linear infinite; }
 
 
 /* ==========================================================================
@@ -1521,6 +1543,22 @@ body.is-locked { overflow: hidden; }
   isolation: isolate;
   color: var(--paper);
 }
+/* Le décor se tait pendant un glissé : balayages, pulsations et bandeau
+   défilant n'apportent rien tant que la main tient le curseur, et chacun coûte
+   une part du fil principal. Reprise immédiate au relâchement. */
+html.is-glisse .btn::before,
+html.is-glisse .eyebrow::before,
+html.is-glisse .marquee__track,
+html.is-glisse .blob--float { animation-play-state: paused; }
+
+/* `will-change` uniquement pendant le glissé : le laisser en permanence
+   garderait des couches en mémoire pour rien. */
+.hero__ba.is-glisse .hero__after,
+.hero__ba.is-glisse .hero__after img,
+.hero__ba.is-glisse .hero__handle,
+.ba.is-glisse .ba__after,
+.ba.is-glisse .ba__handle { will-change: transform; }
+
 .hero__ba {
   position: relative;
   aspect-ratio: 4 / 3;
@@ -1533,19 +1571,31 @@ body.is-locked { overflow: hidden; }
   width: 100%; height: 100%;
   object-fit: cover; object-position: 50% 62%;
 }
+/* Découpage plutôt que translations : la paire de translations qui s'annulent
+   passerait au compositeur, mais la couche cesse d'être peinte dès que le
+   décalage dépasse zéro — mesuré, la photo « après » disparaît entièrement.
+   `clip-path` rend juste, et le coût par image reste faible une fois les
+   animations de décor éteintes. */
 .hero__after { position: absolute; inset: 0; clip-path: inset(0 0 0 var(--pos)); }
 .js .hero__ba { animation: revele-ba 2.2s var(--ease-out) .35s both; }
 @keyframes revele-ba { from { --pos: 0%; } to { --pos: 52%; } }
 @property --pos { syntax: '<percentage>'; inherits: true; initial-value: 0%; }
 
+/* Pleine largeur et translatée, plutôt qu'un `left` en pourcentage : déplacer
+   un bord déclenche une mise en page, déplacer une couche non. Le trait est
+   tracé sur son arête gauche. */
 .hero__handle {
-  position: absolute; top: 0; bottom: 0; left: var(--pos);
-  width: 2px; background: rgba(255,255,255,.9);
-  box-shadow: 0 0 22px rgba(0,0,0,.35);
+  position: absolute; top: 0; bottom: 0; left: 0; right: 0;
+  transform: translateX(var(--pos));
   z-index: 2; pointer-events: none;
 }
+.hero__handle::before {
+  content: ''; position: absolute; top: 0; bottom: 0; left: -1px;
+  width: 2px; background: rgba(255,255,255,.9);
+  box-shadow: 0 0 22px rgba(0,0,0,.35);
+}
 .hero__knob {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  position: absolute; top: 50%; left: 0; transform: translate(-50%, -50%);
   width: 52px; height: 52px; border-radius: 50%;
   background: rgba(255,255,255,.96); color: var(--ink);
   display: grid; place-items: center;
@@ -1571,8 +1621,10 @@ body.is-locked { overflow: hidden; }
   padding: 6px 14px; border-radius: var(--r-pill);
   font-size: var(--t-caption); font-weight: var(--fw-extra);
   letter-spacing: .1em; text-transform: uppercase;
-  background: rgba(6,31,55,.72); color: #fff;
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  /* Aplat translucide plutôt qu'un flou de fond : posée sur une photo qui
+     change à chaque image pendant un glissé, la pastille obligeait le
+     navigateur à refaire le flou soixante fois par seconde. */
+  background: rgba(6,31,55,.82); color: #fff;
 }
 .hero__tag--avant { left: var(--gutter); }
 .hero__tag--apres { right: var(--gutter); background: rgba(0,107,255,.88); }
@@ -1594,7 +1646,7 @@ body.is-locked { overflow: hidden; }
 }
 .hero__content { padding-block: clamp(26px, 6vw, 44px); }
 .hero--photo .lead { color: #d8e6f5; max-width: 52ch; margin-bottom: var(--s-3); }
-.hero--photo .eyebrow { background: rgba(255,255,255,.14); color: #fff; backdrop-filter: blur(6px); }
+.hero--photo .eyebrow { background: rgba(9,38,66,.58); color: #fff; }
 .hero--photo .eyebrow::before { background: #6cb4ff; }
 .hero__content {
   position: relative; z-index: 2; width: 100%;
